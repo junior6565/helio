@@ -481,7 +481,7 @@ export default function App() {
     if (shadowReadTimerRef.current) clearTimeout(shadowReadTimerRef.current)
     shadowReadTimerRef.current = setTimeout(() => {
       readShadowPixels()
-      setShadowVersion(v => v + 1)
+      setTerraces(t => [...t])
     }, 400)
   }, [readShadowPixels])
 
