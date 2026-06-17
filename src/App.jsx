@@ -507,7 +507,7 @@ export default function App() {
         dot.style.background = markerColor(sunny)
         dot.style.boxShadow = sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'
       })
-      setShadowVersion(v => v + 1)
+      setTerraces(t => [...t])
     }, delay)
   }, [readShadowPixels, getShadowStatus])
 
