@@ -511,6 +511,7 @@ export default function App() {
         }
       }
       if (pixelCount > 0 || attempts >= 10) {
+        shadowCacheRef.current = {}
         readShadowPixels()
       } else {
         shadowReadTimerRef.current = setTimeout(tryRead, 300)
