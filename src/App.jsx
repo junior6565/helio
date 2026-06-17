@@ -556,7 +556,6 @@ export default function App() {
 
     const totalRead = Object.keys(newCache).length
     const sunnyCount = Object.values(newCache).filter(Boolean).length
-    console.log('[readShadow] totalRead:', totalRead, 'sunny:', sunnyCount, 'shadow:', totalRead - sunnyCount)
     if (totalRead > 0) {
       shadowCacheRef.current = newCache
       setShadowVersion(v => v + 1)
