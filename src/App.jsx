@@ -557,6 +557,7 @@ export default function App() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
     const newCache = {}
     let ombreCount = 0
+    let debugIdx = 0
 
     terracesRef.current.forEach(terrace => {
       const pt = map.current.latLngToContainerPoint([terrace.lat, terrace.lng])
@@ -564,8 +565,8 @@ export default function App() {
       const y = Math.round(pt.y)
       if (x < 0 || y < 0 || x > canvas.width || y > canvas.height) return
       let opaqueCount = 0
-      for (let dx = -4; dx <= 4; dx++) {
-        for (let dy = -4; dy <= 4; dy++) {
+      for (let dx = -10; dx <= 10; dx++) {
+        for (let dy = -10; dy <= 10; dy++) {
           const px = x + dx
           const py = y + dy
           if (px < 0 || py < 0 || px >= canvas.width || py >= canvas.height) continue
@@ -573,11 +574,22 @@ export default function App() {
           if (p[3] > 0) opaqueCount++
         }
       }
-      const isInShadow = opaqueCount >= 5
+      if (debugIdx < 3) {
+        const samples = []
+        for (let dx = -5; dx <= 5; dx += 2) {
+          for (let dy = -5; dy <= 5; dy += 2) {
+            const px = x + dx; const py = y + dy
+            if (px >= 0 && py >= 0 && px < canvas.width && py < canvas.height)
+              samples.push(ctx.getImageData(px, py, 1, 1).data[3])
+          }
+        }
+        console.log(`[t${debugIdx}] px(${x},${y}) opaque:${opaqueCount}/441 alphas:[${samples.join(',')}]`)
+        debugIdx++
+      }
+      const isInShadow = opaqueCount >= 3
       if (isInShadow) ombreCount++
       newCache[terrace.id] = !isInShadow
     })
-
 
     const totalRead = Object.keys(newCache).length
     const sunnyCount = Object.values(newCache).filter(Boolean).length
