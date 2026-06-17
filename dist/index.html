@@ -4,9 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>helio — trouve ta terrasse au soleil</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='none' stroke='%23E8940A' stroke-width='6'/><circle cx='50' cy='50' r='32' fill='none' stroke='%23E8940A' stroke-width='6'/><circle cx='50' cy='50' r='14' fill='%23E8940A'/></svg>">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="helio">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <meta name="theme-color" content="#E8940A">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body { overflow: hidden; background: #0f172a; }
@@ -31,19 +37,18 @@
       /* Contrôles Leaflet (zoom) — on les laisse au-dessus de la carte mais sous notre UI */
       .leaflet-control-container { z-index: 900 !important; }
       .pills-scroll::-webkit-scrollbar { display: none; }
-      @media (max-width: 768px) {
-        .leaflet-control-attribution {
-          font-size: 9px !important;
-          max-width: 180px !important;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
+      .leaflet-control-attribution {
+        font-size: 9px !important;
+        max-width: 200px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        opacity: 0.7;
       }
     </style>
-    <script type="module" crossorigin src="/assets/index-tSafNZOM.js"></script>
+    <script type="module" crossorigin src="/assets/index-DYmpXtqM.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-CIGW-MKW.css">
-  </head>
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
   <body>
     <div id="root"></div>
   </body>
