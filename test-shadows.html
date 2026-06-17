@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>TerrassSoleil — Test Ombres</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #1e1e2e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px;
+      gap: 10px;
+      font-family: 'Courier New', monospace;
+      color: #cdd6f4;
+    }
+    h1 { font-size: 14px; color: #89b4fa; letter-spacing: .04em; }
+    canvas { display: block; border: 1px solid #313244; cursor: crosshair; }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      align-items: center;
+      background: #181825;
+      padding: 8px 14px;
+      border-radius: 6px;
+    }
+    .ctrl { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .ctrl label { color: #a6adc8; white-space: nowrap; }
+    input[type=range] { width: 180px; accent-color: #89b4fa; cursor: pointer; }
+    .val { min-width: 42px; color: #f9e2af; font-weight: bold; font-size: 13px; }
+    .info {
+      font-size: 11px;
+      color: #6c7086;
+      background: #181825;
+      padding: 5px 12px;
+      border-radius: 4px;
+      letter-spacing: .03em;
+    }
+  </style>
+</head>
+<body>
+
+<h1>TerrassSoleil — Simulateur d'ombres</h1>
+
+<div class="controls">
+  <div class="ctrl">
+    <label>Azimut (direction du soleil):</label>
+    <input type="range" id="az" min="0" max="360" value="215" step="1">
+    <span class="val" id="az-v">215°</span>
+  </div>
+  <div class="ctrl">
+    <label>Altitude:</label>
+    <input type="range" id="alt" min="5" max="75" value="28" step="1">
+    <span class="val" id="alt-v">28°</span>
+  </div>
+</div>
+
+<canvas id="c" width="900" height="660"></canvas>
+<div id="info" class="info"></div>
+
+<script>
+// ─── Canvas setup ─────────────────────────────────────────────────────────────
+const W = 900, H = 660
+const cv = document.getElementById('c')
+const ctx = cv.getContext('2d')
+
+// ─── Building definitions ─────────────────────────────────────────────────────
+// Each building: { pts: [[x,y],...], height: metres }
+// Polygon winding: BL → BR → TR → TL (mathematical CW in y-down coords)
+// This matches the GeoJSON outer rings projected via map.project() in shadowRenderer.js
+// Silhouette normal formula: (-ey, ex) for CW polygons
+
+function mkRect(x, y, w, h, ht) {
+  // BL→BR→TR→TL (mathematical CW, y-down)
+  return {
+    pts: [[x, y+h], [x+w, y+h], [x+w, y], [x, y]],
+    height: ht,
+  }
+}
+
+// Layout: Haussmann-style block simulation
+//   Top-left block: U-shaped courtyard building
+//   Top-right block: two buildings + isolated tower
+//   Bottom block: four buildings of varying height
+//
+// Streets:
+//   Vertical at x=365-430 (separates left from right)
+//   Vertical at x=635-690 (right side)
+//   Horizontal at y=330-415 (separates top from bottom)
+
+const BUILDINGS = [
+  // ── U-shaped block (three wings around a courtyard) ──
+  mkRect( 50,  50,  75, 255,  22),  // left wing
+  mkRect( 50,  50, 285,  72,  22),  // top bar
+  mkRect(285,  50,  75, 255,  22),  // right wing
+
+  // ── Top-right block ─────────────────────────────────
+  mkRect(445,  50, 155, 120,  16),  // front building
+  mkRect(445, 210, 125, 100,  10),  // rear building
+
+  // ── Isolated tall tower ──────────────────────────────
+  mkRect(650, 140, 120, 120,  42),
+
+  // ── Bottom block ────────────────────────────────────
+  mkRect( 50, 425, 180, 130,  26),  // tall building
+  mkRect(295, 425, 155, 130,  15),
+  mkRect(510, 425, 145, 130,  10),
+  mkRect(715, 425, 150, 130,  20),
+]
+
+// ─── Math helpers ─────────────────────────────────────────────────────────────
+function centroid(pts) {
+  let cx = 0, cy = 0
+  for (const [x, y] of pts) { cx += x; cy += y }
+  return [cx / pts.length, cy / pts.length]
+}
+
+function shoelaceArea(pts) {
+  let a = 0
+  const n = pts.length
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n
+    a += pts[i][0] * pts[j][1] - pts[j][0] * pts[i][1]
+  }
+  return a / 2  // signed: negative = CW in y-down
+}
+
+// Ray–segment intersection
+// Ray from (px,py) in unit direction (ndx,ndy)
+// Segment from q1=[x,y] to q2=[x,y]
+// Returns distance t along ray (t>0) if hit within segment, else null
+function rayHitSegment(px, py, ndx, ndy, q1, q2) {
+  const ex = q2[0] - q1[0], ey = q2[1] - q1[1]
+  const denom = ndx * ey - ndy * ex
+  if (Math.abs(denom) < 1e-10) return null   // parallel
+  const qx = q1[0] - px, qy = q1[1] - py
+  const t = (qx * ey - qy * ex) / denom
+  const s = (qx * ndy - qy * ndx) / denom
+  return (t > 0 && s >= 0 && s <= 1) ? t : null
+}
+
+// ─── Shadow direction in screen-pixel space ───────────────────────────────────
+// shadowDirRad = (azimuth + 180) % 360 in radians
+// In y-down screen coords (north = -y, east = +x):
+//   sdx = sin(shadowDirRad)     (east component)
+//   sdy = -cos(shadowDirRad)    (north component, negated for y-down)
+
+// ─── Main render ──────────────────────────────────────────────────────────────
+function render() {
+  const azimuth = +document.getElementById('az').value
+  const altitude = +document.getElementById('alt').value
+  document.getElementById('az-v').textContent = azimuth + '°'
+  document.getElementById('alt-v').textContent = altitude + '°'
+
+  // ── Background & streets ─────────────────────────────
+  ctx.fillStyle = '#F2EDE0'
+  ctx.fillRect(0, 0, W, H)
+
+  ctx.fillStyle = '#E4DDD0'   // slightly darker for streets
+  ctx.fillRect(365, 0, 68, 330)    // vertical street (left|right blocks)
+  ctx.fillRect(635, 0, 58, 330)    // vertical street (right side)
+  ctx.fillRect(0, 330, W, 88)      // horizontal street
+
+  // ── Shadow parameters ────────────────────────────────
+  const shadowDirRad = ((azimuth + 180) % 360) * (Math.PI / 180)
+  const tanAlt = Math.tan(altitude * (Math.PI / 180))
+  const sdx = Math.sin(shadowDirRad)    // shadow east component (screen +x)
+  const sdy = -Math.cos(shadowDirRad)   // shadow north→screen (-y = up)
+
+  // ── Per-building projection ──────────────────────────
+  // Mirrors shadowRenderer.js Phase 1 but in pixel space (no map.project needed)
+  const data = BUILDINGS.map(b => {
+    const { pts, height } = b
+    const n = pts.length
+
+    const shadowLen = Math.min(height / tanAlt, 150)
+    const dx = sdx * shadowLen
+    const dy = sdy * shadowLen
+
+    const sPts = pts.map(([x, y]) => [x + dx, y + dy])
+
+    const area = shoelaceArea(pts)   // negative = CW ✓
+
+    const [bcx, bcy] = centroid(pts)
+    const [scx, scy] = centroid(sPts)
+
+    // Ray: from shadow centroid toward building centroid (= toward sun)
+    const rdx = bcx - scx
+    const rdy = bcy - scy
+    const shadowPxLen = Math.sqrt(rdx * rdx + rdy * rdy)
+
+    return { pts, sPts, n, height, bcx, bcy, scx, scy, rdx, rdy, shadowPxLen, area }
+  })
+
+  // ── Shadow pass (exact algorithm from shadowRenderer.js) ─────────────────
+  ctx.save()
+  ctx.globalCompositeOperation = 'multiply'
+  ctx.fillStyle = 'rgba(50, 40, 20, 0.30)'
+  ctx.beginPath()
+
+  for (const a of data) {
+    const { pts, sPts, n, scx, scy, bcx, bcy, rdx, rdy, shadowPxLen, height: hA } = a
+
+    // Filter very small footprints (area < 100 px²)
+    if (Math.abs(a.area) < 100) continue
+    if (shadowPxLen < 1) continue
+
+    // ── Raycasting: is A's shadow occluded by a taller building? ──
+    const ndx = rdx / shadowPxLen     // unit direction toward sun
+    const ndy = rdy / shadowPxLen
+    const maxT = shadowPxLen * 1.5    // search within 1.5× shadow length
+
+    let blocked = false
+    outer: for (const b of data) {
+      if (b === a) continue
+      for (let i = 0; i < b.n; i++) {
+        const j = (i + 1) % b.n
+        const t = rayHitSegment(scx, scy, ndx, ndy, b.pts[i], b.pts[j])
+        if (t !== null && t <= maxT) {
+          // Height of the sun ray at this intersection point
+          // (linear interpolation: 0 at shadow tip, hA at building top)
+          const rayHeightAtT = (t / shadowPxLen) * hA
+          if (b.height > rayHeightAtT) { blocked = true; break outer }
+        }
+      }
+    }
+    if (blocked) continue
+
+    // ── Draw shadow shapes ────────────────────────────────────────
+    const ddx = scx - bcx    // shadow direction (building → shadow tip)
+    const ddy = scy - bcy
+
+    // 1. Shadow tip polygon: sPts in REVERSED order (CW→CCW)
+    ctx.moveTo(sPts[n - 1][0], sPts[n - 1][1])
+    for (let i = n - 2; i >= 0; i--) ctx.lineTo(sPts[i][0], sPts[i][1])
+    ctx.closePath()
+
+    // 2. Silhouette quads for edges facing away from sun
+    //    Outward normal for CW polygon edge (ex,ey): (-ey, ex)
+    //    Edge is silhouette if outward_normal · shadow_dir > 0
+    //    i.e. (-ey)*ddx + ex*ddy > 0
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n
+      const [ax, ay] = pts[i], [bx, by] = pts[j]
+      const ex = bx - ax, ey = by - ay
+      if ((-ey) * ddx + ex * ddy > 0) {
+        ctx.moveTo(ax, ay)
+        ctx.lineTo(bx, by)
+        ctx.lineTo(sPts[j][0], sPts[j][1])
+        ctx.lineTo(sPts[i][0], sPts[i][1])
+        ctx.closePath()
+      }
+    }
+
+    // 3. Footprint hole: reversed pts (CW→CCW) punches a hole via evenodd rule
+    //    The base of the shadow quads overlaps the building footprint;
+    //    this contour creates a count-2 region there → unfilled (no shadow on building)
+    ctx.moveTo(pts[0][0], pts[0][1])
+    for (let i = n - 1; i >= 1; i--) ctx.lineTo(pts[i][0], pts[i][1])
+    ctx.closePath()
+  }
+
+  ctx.fill('evenodd')
+  ctx.globalCompositeOperation = 'source-over'
+  ctx.restore()
+
+  // ── Draw buildings ────────────────────────────────────────────
+  ctx.fillStyle = '#C8CDD4'
+  ctx.strokeStyle = '#9AA0AA'
+  ctx.lineWidth = 1
+
+  for (const b of BUILDINGS) {
+    ctx.beginPath()
+    const [[x0, y0], ...rest] = b.pts
+    ctx.moveTo(x0, y0)
+    for (const [x, y] of rest) ctx.lineTo(x, y)
+    ctx.closePath()
+    ctx.fill()
+    ctx.stroke()
+
+    // Height label
+    const [cx, cy] = centroid(b.pts)
+    ctx.fillStyle = '#55555a'
+    ctx.font = '11px Courier New'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(b.height + 'm', cx, cy)
+    ctx.fillStyle = '#C8CDD4'
+  }
+
+  // ── Info bar ──────────────────────────────────────────────────
+  const sl = h => Math.round(Math.min(h / tanAlt, 150))
+  const compass = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO']
+  const dir = compass[Math.round(azimuth / 22.5) % 16]
+  document.getElementById('info').textContent =
+    `Azimut: ${azimuth}° (${dir}) | Altitude: ${altitude}° | ` +
+    `Longueur ombre — 10m: ${sl(10)}px · 22m: ${sl(22)}px · 42m: ${sl(42)}px`
+}
+
+// ─── Event listeners ──────────────────────────────────────────────────────────
+document.getElementById('az').addEventListener('input', render)
+document.getElementById('alt').addEventListener('input', render)
+render()
+</script>
+</body>
+</html>

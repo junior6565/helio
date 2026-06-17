@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>helio — trouve ta terrasse au soleil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { overflow: hidden; background: #0f172a; }
+      #root { width: 100vw; height: 100dvh; }
+      input[type="range"] {
+        -webkit-appearance: none;
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(255,255,255,0.1);
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #f59e0b;
+        cursor: pointer;
+        box-shadow: 0 0 0 3px rgba(245,158,11,0.3);
+      }
+      /* Leaflet : garde ses z-index internes (jusqu'à 800) dans son propre contexte */
+      .leaflet-container { isolation: isolate; }
+      /* Contrôles Leaflet (zoom) — on les laisse au-dessus de la carte mais sous notre UI */
+      .leaflet-control-container { z-index: 900 !important; }
+      .pills-scroll::-webkit-scrollbar { display: none; }
+      @media (max-width: 768px) {
+        .leaflet-control-attribution {
+          font-size: 9px !important;
+          max-width: 180px !important;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
