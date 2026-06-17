@@ -486,7 +486,8 @@ export default function App() {
       if (isInShadow) ombreCount++
       newCache[terrace.id] = !isInShadow
     })
-    if (ombreCount > 0) {
+    const totalRead = Object.keys(newCache).length
+    if (totalRead > 0) {
       shadowCacheRef.current = newCache
       setShadowVersion(v => v + 1)
     }
@@ -511,7 +512,6 @@ export default function App() {
         }
       }
       if (pixelCount > 0 || attempts >= 10) {
-        shadowCacheRef.current = {}
         readShadowPixels()
         setShadowVersion(v => v + 1)
       } else {
