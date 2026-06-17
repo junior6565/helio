@@ -401,7 +401,7 @@ export default function App() {
     setSunInfo({ ...pos, score, ...label, ...sunTimes })
     setTimeSlots(generateTimeSlots(time, mapCenter.lat, mapCenter.lng))
     shadowRendererRef.current?.update(time)
-    scheduleShadowRead(500)
+    scheduleShadowRead(2500)
   }, [time, mapCenter])
 
   const loadTerraces = useCallback(async (lat, lng, radius = 1000) => {
