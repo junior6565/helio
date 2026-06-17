@@ -635,6 +635,26 @@ export default function App() {
               />
               {loading && <span style={{ color: '#F59E0B', fontSize: 12, fontWeight: 500, flexShrink: 0 }}>Chargement…</span>}
               <button
+                onClick={() => {
+                  const c = map.current.getCenter()
+                  loadTerraces(c.lat, c.lng, 800)
+                }}
+                style={{
+                  background: '#E8940A',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: isMobile ? '6px 8px' : '6px 12px',
+                  fontSize: isMobile ? 11 : 13,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
+              >
+                {isMobile ? 'Zone' : 'Cette zone'}
+              </button>
+              <button
                 onClick={() => setFilterPanelOpen(true)}
                 style={{
                   ...btnBase, background: '#F9F9F9', border: '0.5px solid #E5E7EB',
