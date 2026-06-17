@@ -125,6 +125,18 @@ function IconClock({ size = 16, color = '#374151' }) {
   )
 }
 
+function IconHelp({ size = 14, color = '#9CA3AF' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+      style={{ flexShrink: 0 }}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  )
+}
+
 function IconMapPin({ size = 16, color = '#374151' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
@@ -278,6 +290,7 @@ export default function App() {
   const [showIntro, setShowIntro] = useState(() => !localStorage.getItem('helio_intro_seen'))
   const [shadowVersion, setShadowVersion] = useState(0)
   const [showPlanifier, setShowPlanifier] = useState(false)
+  const [showSearchHere, setShowSearchHere] = useState(false)
   const [planifQuartier, setPlanifQuartier] = useState('')
   const [planifDebut, setPlanifDebut] = useState('17:00')
   const [planifFin, setPlanifFin] = useState('20:00')
@@ -286,6 +299,10 @@ export default function App() {
   const [planifActif, setPlanifActif] = useState(false)
   const [planifResultats, setPlanifResultats] = useState([])
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [terraceConfirmations, setTerraceConfirmations] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('helio_terrace_confirmations') || '{}') }
+    catch { return {} }
+  })
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768)
@@ -351,6 +368,7 @@ export default function App() {
       if (flyingRef.current) return
       const c = map.current.getCenter()
       setMapCenter({ lat: c.lat, lng: c.lng })
+      setShowSearchHere(true)
       scheduleShadowRead()
       if (osmbRef.current && typeof osmbRef.current.each === 'function') {
         osmbRef.current.each(function(feature) {
@@ -383,7 +401,7 @@ export default function App() {
     setSunInfo({ ...pos, score, ...label, ...sunTimes })
     setTimeSlots(generateTimeSlots(time, mapCenter.lat, mapCenter.lng))
     shadowRendererRef.current?.update(time)
-    scheduleShadowRead()
+    scheduleShadowRead(2500)
   }, [time, mapCenter])
 
   const loadTerraces = useCallback(async (lat, lng, radius = 1000) => {
@@ -472,18 +490,26 @@ export default function App() {
     })
 
 
-    if (ombreCount > 0) {
+    const totalRead = Object.keys(newCache).length
+    if (totalRead > 0) {
       shadowCacheRef.current = newCache
     }
   }, [])
 
-  const scheduleShadowRead = useCallback(() => {
+  const scheduleShadowRead = useCallback((delay = 400) => {
     if (shadowReadTimerRef.current) clearTimeout(shadowReadTimerRef.current)
     shadowReadTimerRef.current = setTimeout(() => {
       readShadowPixels()
-      setTerraces(t => [...t])
-    }, 400)
-  }, [readShadowPixels])
+      Object.entries(markersRef.current).forEach(([id, { dot }]) => {
+        const terrace = terracesRef.current.find(t => t.id === id)
+        if (!terrace || !dot) return
+        const sunny = getShadowStatus(terrace, timeRef.current)
+        dot.style.background = markerColor(sunny)
+        dot.style.boxShadow = sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'
+      })
+      setShadowVersion(v => v + 1)
+    }, delay)
+  }, [readShadowPixels, getShadowStatus])
 
   // ── Markers ───────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -518,14 +544,20 @@ export default function App() {
         })
 
     toDisplay.forEach(terrace => {
+      if (terrace.hasOutdoorSeating === false) return
+
       const sunny = planifActif ? true : getShadowStatus(terrace, timeRef.current)
       const color = markerColor(sunny)
+      const isUnconfirmed = terrace.hasOutdoorSeating === null
+      const dotBorder = isUnconfirmed ? '2px dashed #ffffff' : '2px solid #ffffff'
+      const dotOpacity = isUnconfirmed ? '0.75' : '1'
+      const sz = isMobile ? '28px' : '20px'
 
       const icon = L.divIcon({
         className: '',
         html: `<div style="position:relative;width:36px;height:36px;">
           <div class="mk-ring" style="position:absolute;top:50%;left:50%;width:36px;height:36px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid transparent;opacity:0;transition:all 0.2s ease;pointer-events:none;box-sizing:border-box;"></div>
-          <div class="mk-dot" style="position:absolute;top:50%;left:50%;width:${isMobile ? '28px' : '20px'};height:${isMobile ? '28px' : '20px'};border-radius:50%;transform:translate(-50%,-50%);border:2px solid #ffffff;cursor:pointer;background:${color};box-shadow:${sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'};transition:width 0.2s ease,height 0.2s ease,background 0.2s ease,box-shadow 0.2s ease;box-sizing:border-box;"></div>
+          <div class="mk-dot" style="position:absolute;top:50%;left:50%;width:${sz};height:${sz};border-radius:50%;transform:translate(-50%,-50%);border:${dotBorder};cursor:pointer;background:${color};box-shadow:${sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'};opacity:${dotOpacity};transition:width 0.2s ease,height 0.2s ease,background 0.2s ease,box-shadow 0.2s ease;box-sizing:border-box;"></div>
         </div>`,
         iconSize: [36, 36],
         iconAnchor: [18, 18],
@@ -631,59 +663,46 @@ export default function App() {
         width: 'calc(100vw - 24px)', maxWidth: 540, zIndex: 1100,
       }}>
         <div style={{ ...panel, display: 'flex', flexDirection: 'column' }}>
-          {/* Niveau 1 : barre de recherche */}
+          {/* Bandeau orange helio */}
+          <div style={{
+            background: '#E8940A',
+            padding: isMobile ? '8px 14px' : '10px 14px',
+            display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8,
+            borderRadius: '14px 14px 0 0',
+          }}>
+            <div style={{ position: 'relative', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ position: 'absolute', width: 16, height: 16, borderRadius: '50%', border: '1.5px solid white' }} />
+              <div style={{ position: 'absolute', width: 10, height: 10, borderRadius: '50%', border: '1.5px solid white' }} />
+              <div style={{ position: 'absolute', width: 4, height: 4, borderRadius: '50%', background: 'white' }} />
+            </div>
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: isMobile ? 16 : 17, fontWeight: 700, color: 'white', letterSpacing: '-0.5px' }}>helio</span>
+          </div>
+
+          {/* Ligne recherche + boutons */}
           <div style={{ position: 'relative' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: isMobile ? 28 : 34, height: isMobile ? 28 : 34, flexShrink: 0 }}>
-                  <div style={{ position: 'absolute', width: isMobile ? 24 : 30, height: isMobile ? 24 : 30, borderRadius: '50%', border: '2px solid #E8940A', background: 'transparent' }} />
-                  <div style={{ position: 'absolute', width: isMobile ? 16 : 20, height: isMobile ? 16 : 20, borderRadius: '50%', border: '2px solid #E8940A', background: 'transparent' }} />
-                  <div style={{ position: 'absolute', width: isMobile ? 8 : 10, height: isMobile ? 8 : 10, borderRadius: '50%', background: '#E8940A' }} />
-                </div>
-                <span style={{ fontSize: 20, fontWeight: 700, color: '#E8940A', letterSpacing: '-1px', fontFamily: "'Syne', sans-serif", flexShrink: 0, lineHeight: 1, marginTop: 0, position: 'relative', top: 0 }}>helio</span>
+            <div style={{ padding: '7px 10px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, background: '#F9F9F9', borderRadius: 20, padding: '7px 14px', border: '0.5px solid #E8D8B0', minWidth: 0 }}>
+                <IconSearch size={14} color="#9CA3AF" />
+                <input
+                  type="text"
+                  placeholder={isMobile ? 'Rechercher...' : 'Rechercher un lieu ou une terrasse...'}
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+                  style={{
+                    flex: 1, border: 'none', outline: 'none', background: 'transparent',
+                    color: '#1C1C1E', fontSize: 12, fontFamily: 'inherit', minWidth: 0,
+                  }}
+                />
+                {loading && <span style={{ color: '#F59E0B', fontSize: 11, fontWeight: 500, flexShrink: 0 }}>…</span>}
               </div>
-              <div style={{ width: 1, height: 18, background: '#E5E7EB', flexShrink: 0 }} />
-              <IconSearch size={16} color="#9CA3AF" />
-              <input
-                type="text"
-                placeholder={isMobile ? 'Rechercher...' : 'Rechercher un lieu ou une terrasse...'}
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
-                style={{
-                  flex: 1, border: 'none', outline: 'none', background: 'transparent',
-                  color: '#1C1C1E', fontSize: 14, fontFamily: 'inherit', minWidth: 0,
-                }}
-              />
-              {loading && <span style={{ color: '#F59E0B', fontSize: 12, fontWeight: 500, flexShrink: 0 }}>Chargement…</span>}
-              <button
-                onClick={() => {
-                  const c = map.current.getCenter()
-                  loadTerraces(c.lat, c.lng, 800)
-                }}
-                style={{
-                  background: 'white',
-                  color: '#374151',
-                  border: '0.5px solid #E5E7EB',
-                  borderRadius: 20,
-                  padding: isMobile ? '6px 8px' : '6px 12px',
-                  fontSize: isMobile ? 11 : 13,
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0,
-                }}
-              >
-                {isMobile ? 'Zone' : 'Cette zone'}
-              </button>
               <button
                 onClick={() => setFilterPanelOpen(true)}
                 style={{
                   ...btnBase, background: '#F9F9F9', border: '0.5px solid #E5E7EB',
-                  borderRadius: 8, padding: isMobile ? '0' : '5px 10px', gap: 5, flexShrink: 0,
-                  color: '#374151', fontSize: 12, fontWeight: 500,
-                  width: isMobile ? 34 : 'auto', height: isMobile ? 34 : 'auto',
+                  borderRadius: 20, padding: isMobile ? '7px 8px' : '7px 10px', gap: 4, flexShrink: 0,
+                  color: '#374151', fontSize: 11,
                 }}
               >
                 <IconSliders size={13} color="#374151" />
@@ -693,9 +712,8 @@ export default function App() {
                 onClick={() => setShowPlanifier(v => !v)}
                 style={{
                   ...btnBase, background: '#E8940A', border: 'none',
-                  borderRadius: 20, padding: isMobile ? '0' : '5px 10px', gap: 5, flexShrink: 0,
-                  color: '#fff', fontSize: 12, fontWeight: 600,
-                  width: isMobile ? 34 : 'auto', height: isMobile ? 34 : 'auto',
+                  borderRadius: 20, padding: isMobile ? '7px 8px' : '7px 10px', gap: 4, flexShrink: 0,
+                  color: '#fff', fontSize: 11, fontWeight: 500,
                 }}
               >
                 <IconClock size={13} color="#fff" />
@@ -786,6 +804,35 @@ export default function App() {
         </div>
       </div>
 
+      {/* Bouton flottant "Rechercher dans cette zone" */}
+      {showSearchHere && (
+        <div style={{
+          position: 'absolute',
+          top: isMobile ? 140 : 150,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 1100,
+        }}>
+          <button
+            onClick={() => {
+              const c = map.current.getCenter()
+              loadTerraces(c.lat, c.lng, 800)
+              setShowSearchHere(false)
+            }}
+            style={{
+              background: 'white', border: '1px solid #E8D8B0', borderRadius: 20,
+              padding: '7px 18px', fontSize: 12, color: '#374151',
+              fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500,
+              cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.10)',
+              display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
+            }}
+          >
+            <IconSearch size={12} color="#E8940A" />
+            Rechercher dans cette zone
+          </button>
+        </div>
+      )}
+
       {/* Sun widget — top left */}
       {sunInfo && (
         <div style={{
@@ -804,7 +851,6 @@ export default function App() {
             <SunStatusIcon score={sunInfo.score} />
             <div>
               <div style={{ fontWeight: 600, fontSize: 13, color: sunInfo.color }}>{sunInfo.label}</div>
-              <div style={{ fontSize: 12, color: '#6B7280' }}>Altitude {sunInfo.altitude.toFixed(0)}°</div>
             </div>
           </div>
           {!isMobile && (
@@ -1018,6 +1064,70 @@ export default function App() {
                   </span>
                 </div>
               </div>
+              {/* Confirmation terrasse communautaire */}
+              {selectedTerrace && (() => {
+                const confirmation = terraceConfirmations[selectedTerrace.id]
+                const hasOutdoor = selectedTerrace.hasOutdoorSeating
+
+                if (confirmation === 'confirmed') {
+                  return (
+                    <div style={{ marginTop: 8, fontSize: 11, color: '#E8940A', fontWeight: 500 }}>
+                      ✓ Terrasse confirmée par la communauté
+                    </div>
+                  )
+                }
+
+                if (confirmation === 'denied' || hasOutdoor === false) return null
+
+                if (hasOutdoor === null && !confirmation) {
+                  return (
+                    <div style={{
+                      marginTop: 10,
+                      background: '#FFFBF2', border: '1px solid #E8D8B0',
+                      borderRadius: 12, padding: '12px 14px',
+                    }}>
+                      <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 10px', lineHeight: 1.5 }}>
+                        Nous ne pouvons pas garantir que cet établissement dispose d'une terrasse. Le savez-vous ?
+                      </p>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          onClick={() => {
+                            const updated = { ...terraceConfirmations, [selectedTerrace.id]: 'confirmed' }
+                            setTerraceConfirmations(updated)
+                            localStorage.setItem('helio_terrace_confirmations', JSON.stringify(updated))
+                          }}
+                          style={{
+                            flex: 1, background: '#E8940A', border: 'none',
+                            borderRadius: 20, padding: '8px 0', fontSize: 12,
+                            color: 'white', fontWeight: 500, cursor: 'pointer',
+                            fontFamily: "'Space Grotesk', sans-serif",
+                          }}
+                        >
+                          Oui, il y en a une
+                        </button>
+                        <button
+                          onClick={() => {
+                            const updated = { ...terraceConfirmations, [selectedTerrace.id]: 'denied' }
+                            setTerraceConfirmations(updated)
+                            localStorage.setItem('helio_terrace_confirmations', JSON.stringify(updated))
+                            setSelectedTerrace(null)
+                          }}
+                          style={{
+                            flex: 1, background: 'white', border: '1px solid #E5E7EB',
+                            borderRadius: 20, padding: '8px 0', fontSize: 12,
+                            color: '#6B7280', cursor: 'pointer',
+                            fontFamily: "'Space Grotesk', sans-serif",
+                          }}
+                        >
+                          Non, pas de terrasse
+                        </button>
+                      </div>
+                    </div>
+                  )
+                }
+
+                return null
+              })()}
               {/* Ligne 4 : slider */}
               <div style={{ borderTop: '1px solid #F3F4F6', paddingTop: 12 }}>
                 <TimeSlider time={time} timeSlots={timeSlots} onChange={handleTimeChange} />
@@ -1445,7 +1555,7 @@ export default function App() {
           navigator.geolocation.getCurrentPosition(pos => {
             map.current.flyTo(
               [pos.coords.latitude, pos.coords.longitude],
-              16,
+              17,
               { duration: 0.8 }
             )
           })
