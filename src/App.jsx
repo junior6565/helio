@@ -173,10 +173,10 @@ function markerColor(sunny) {
   return sunny ? '#E8A020' : '#94A3B8'
 }
 
-function SunStatusIcon({ score }) {
-  if (score === 0) return <IconMoon size={22} color="#64748B" />
+function SunStatusIcon({ score, size = 22 }) {
+  if (score === 0) return <IconMoon size={size} color="#64748B" />
   const color = score >= 70 ? '#E8A020' : score >= 30 ? '#F07828' : '#F97316'
-  return <IconSun size={22} color={color} />
+  return <IconSun size={size} color={color} />
 }
 
 function StarRating({ rating }) {
@@ -834,9 +834,9 @@ export default function App() {
               { label: '4+ étoiles', active: filter.minRating >= 4, onClick: () => setFilter(f => ({ ...f, minRating: f.minRating >= 4 ? 0 : 4 })), icon: <IconStar size={11} color={filter.minRating >= 4 ? '#8B6914' : '#F59E0B'} /> },
               { label: 'Bar', active: filter.type === 'bar', onClick: () => setFilter(f => ({ ...f, type: f.type === 'bar' ? 'all' : 'bar' })) },
               { label: 'Café', active: filter.type === 'café', onClick: () => setFilter(f => ({ ...f, type: f.type === 'café' ? 'all' : 'café' })) },
-              { label: '☀️ Au soleil', active: filter.onlySunny, onClick: () => setFilter(f => ({ ...f, onlySunny: !f.onlySunny })) },
-            ].map(({ label, active, onClick, icon }) => (
-              <button key={label} onClick={onClick} style={{
+              { key: 'sunny', label: 'Au soleil', active: filter.onlySunny, onClick: () => setFilter(f => ({ ...f, onlySunny: !f.onlySunny })), icon: <SunStatusIcon score={sunInfo?.score ?? 70} size={13} /> },
+            ].map(({ key, label, active, onClick, icon }) => (
+              <button key={key ?? label} onClick={onClick} style={{
                 ...btnBase, gap: 4,
                 background: active ? '#FFF7E6' : 'transparent',
                 border: active ? '1.5px solid #E8940A' : '1.5px solid #E5E7EB',
@@ -904,22 +904,25 @@ export default function App() {
           background: 'rgba(255,251,242,0.92)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
-          borderRadius: 16,
+          borderRadius: isMobile ? 12 : 16,
           border: '0.5px solid rgba(232,148,10,0.2)',
           boxShadow: 'none',
-          position: 'absolute', top: 114, left: 12, zIndex: 1100,
-          padding: isMobile ? '8px 10px' : '10px 14px',
+          position: 'absolute', top: isMobile ? 185 : 114, left: 12, zIndex: 1100,
+          padding: isMobile ? '6px 10px' : '10px 14px',
           minWidth: isMobile ? 'auto' : 170,
         }}>
-          <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>Soleil maintenant</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: isMobile ? 0 : 6 }}>
-            <SunStatusIcon score={sunInfo.score} />
-            <div>
-              <div style={{ fontWeight: 600, fontSize: 13, color: sunInfo.color }}>{sunInfo.label}</div>
+          {isMobile ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <SunStatusIcon score={sunInfo.score} size={16} />
+              <div style={{ fontWeight: 600, fontSize: 12, color: sunInfo.color }}>{sunInfo.label}</div>
             </div>
-          </div>
-          {!isMobile && (
+          ) : (
             <>
+              <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>Soleil maintenant</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                <SunStatusIcon score={sunInfo.score} />
+                <div style={{ fontWeight: 600, fontSize: 13, color: sunInfo.color }}>{sunInfo.label}</div>
+              </div>
               <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 8, fontWeight: 500, marginTop: 6 }}>
                 24°C · Dégagé
               </div>
