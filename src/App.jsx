@@ -494,6 +494,7 @@ export default function App() {
     if (totalRead > 0) {
       shadowCacheRef.current = newCache
     }
+    console.log('[shadow] cache updated:', Object.keys(shadowCacheRef.current).length, 'entries, sample:', Object.entries(shadowCacheRef.current).slice(0,3))
   }, [])
 
   const scheduleShadowRead = useCallback((delay = 400) => {
