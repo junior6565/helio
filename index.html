@@ -31,14 +31,13 @@
       /* Contrôles Leaflet (zoom) — on les laisse au-dessus de la carte mais sous notre UI */
       .leaflet-control-container { z-index: 900 !important; }
       .pills-scroll::-webkit-scrollbar { display: none; }
-      @media (max-width: 768px) {
-        .leaflet-control-attribution {
-          font-size: 9px !important;
-          max-width: 180px !important;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
+      .leaflet-control-attribution {
+        font-size: 9px !important;
+        max-width: 200px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        opacity: 0.7;
       }
     </style>
   </head>

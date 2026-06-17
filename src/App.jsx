@@ -328,6 +328,7 @@ export default function App() {
       osmbRef.current.each(function(feature) {
         feature.color = '#C8BCA0'
         feature.roofColor = '#B8AC90'
+        return feature
       })
     }
 
@@ -351,6 +352,13 @@ export default function App() {
       const c = map.current.getCenter()
       setMapCenter({ lat: c.lat, lng: c.lng })
       scheduleShadowRead()
+      if (osmbRef.current && typeof osmbRef.current.each === 'function') {
+        osmbRef.current.each(function(feature) {
+          feature.color = '#C8BCA0'
+          feature.roofColor = '#B8AC90'
+          return feature
+        })
+      }
     })
 
     return () => {
@@ -626,12 +634,14 @@ export default function App() {
           {/* Niveau 1 : barre de recherche */}
           <div style={{ position: 'relative' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px' }}>
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: isMobile ? 28 : 34, height: isMobile ? 28 : 34, flexShrink: 0 }}>
-                <div style={{ position: 'absolute', width: isMobile ? 24 : 30, height: isMobile ? 24 : 30, borderRadius: '50%', border: '2px solid #E8940A', background: 'transparent' }} />
-                <div style={{ position: 'absolute', width: isMobile ? 16 : 20, height: isMobile ? 16 : 20, borderRadius: '50%', border: '2px solid #E8940A', background: 'transparent' }} />
-                <div style={{ position: 'absolute', width: isMobile ? 8 : 10, height: isMobile ? 8 : 10, borderRadius: '50%', background: '#E8940A' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: isMobile ? 28 : 34, height: isMobile ? 28 : 34, flexShrink: 0 }}>
+                  <div style={{ position: 'absolute', width: isMobile ? 24 : 30, height: isMobile ? 24 : 30, borderRadius: '50%', border: '2px solid #E8940A', background: 'transparent' }} />
+                  <div style={{ position: 'absolute', width: isMobile ? 16 : 20, height: isMobile ? 16 : 20, borderRadius: '50%', border: '2px solid #E8940A', background: 'transparent' }} />
+                  <div style={{ position: 'absolute', width: isMobile ? 8 : 10, height: isMobile ? 8 : 10, borderRadius: '50%', background: '#E8940A' }} />
+                </div>
+                <span style={{ fontSize: 20, fontWeight: 700, color: '#E8940A', letterSpacing: '-1px', fontFamily: "'Syne', sans-serif", flexShrink: 0, lineHeight: 1, marginTop: 0, position: 'relative', top: 0 }}>helio</span>
               </div>
-              <span style={{ fontSize: 20, fontWeight: 700, color: '#E8940A', letterSpacing: '-1px', marginLeft: 6, fontFamily: "'Syne', sans-serif", flexShrink: 0 }}>helio</span>
               <div style={{ width: 1, height: 18, background: '#E5E7EB', flexShrink: 0 }} />
               <IconSearch size={16} color="#9CA3AF" />
               <input
@@ -859,8 +869,8 @@ export default function App() {
               {[0, 3.5, 4, 4.5].map(r => (
                 <button key={r} onClick={() => setFilter(f => ({ ...f, minRating: r }))} style={{
                   ...btnBase,
-                  background: filter.minRating === r ? '#F59E0B' : '#F9FAFB',
-                  border: `1px solid ${filter.minRating === r ? '#F59E0B' : '#E5E7EB'}`,
+                  background: filter.minRating === r ? '#E8940A' : '#F9FAFB',
+                  border: filter.minRating === r ? 'none' : '0.5px solid #E5E7EB',
                   borderRadius: 8, padding: '6px 10px',
                   color: filter.minRating === r ? '#fff' : '#374151',
                   fontSize: 12, fontWeight: 600,
@@ -878,8 +888,8 @@ export default function App() {
               {['all', 'café', 'bar', 'restaurant'].map(t => (
                 <button key={t} onClick={() => setFilter(f => ({ ...f, type: t }))} style={{
                   ...btnBase,
-                  background: filter.type === t ? '#3B82F6' : '#F9FAFB',
-                  border: `1px solid ${filter.type === t ? '#3B82F6' : '#E5E7EB'}`,
+                  background: filter.type === t ? '#E8940A' : '#F9FAFB',
+                  border: filter.type === t ? 'none' : '0.5px solid #E5E7EB',
                   borderRadius: 8, padding: '6px 12px',
                   color: filter.type === t ? '#fff' : '#374151',
                   fontSize: 12, fontWeight: 600,
