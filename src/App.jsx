@@ -401,7 +401,7 @@ export default function App() {
     setSunInfo({ ...pos, score, ...label, ...sunTimes })
     setTimeSlots(generateTimeSlots(time, mapCenter.lat, mapCenter.lng))
     shadowRendererRef.current?.update(time)
-    scheduleShadowRead()
+    scheduleShadowRead(500)
   }, [time, mapCenter])
 
   const loadTerraces = useCallback(async (lat, lng, radius = 1000) => {
@@ -495,7 +495,7 @@ export default function App() {
     }
   }, [])
 
-  const scheduleShadowRead = useCallback(() => {
+  const scheduleShadowRead = useCallback((delay = 400) => {
     if (shadowReadTimerRef.current) clearTimeout(shadowReadTimerRef.current)
     shadowReadTimerRef.current = setTimeout(() => {
       readShadowPixels()
@@ -507,7 +507,7 @@ export default function App() {
         dot.style.boxShadow = sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'
       })
       setShadowVersion(v => v + 1)
-    }, 400)
+    }, delay)
   }, [readShadowPixels, getShadowStatus])
 
   // ── Markers ───────────────────────────────────────────────────────────────
