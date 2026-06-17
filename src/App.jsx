@@ -401,7 +401,7 @@ export default function App() {
     setSunInfo({ ...pos, score, ...label, ...sunTimes })
     setTimeSlots(generateTimeSlots(time, mapCenter.lat, mapCenter.lng))
     shadowRendererRef.current?.update(time)
-    scheduleShadowRead(2500)
+    scheduleShadowRead()
   }, [time, mapCenter])
 
   const loadTerraces = useCallback(async (lat, lng, radius = 1000) => {
@@ -464,11 +464,9 @@ export default function App() {
     const canvases = mapContainer.current.querySelectorAll('canvas')
     const canvas = canvases[0]
     if (!canvas || canvas.width === 0) return
-
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
     const newCache = {}
     let ombreCount = 0
-
     terracesRef.current.forEach(terrace => {
       const pt = map.current.latLngToContainerPoint([terrace.lat, terrace.lng])
       const x = Math.round(pt.x)
@@ -488,21 +486,17 @@ export default function App() {
       if (isInShadow) ombreCount++
       newCache[terrace.id] = !isInShadow
     })
-
-
-    const totalRead = Object.keys(newCache).length
-    if (totalRead > 0) {
+    if (ombreCount > 0) {
       shadowCacheRef.current = newCache
+      setShadowVersion(v => v + 1)
     }
-    console.log('[shadow] cache updated:', Object.keys(shadowCacheRef.current).length, 'entries, sample:', Object.entries(shadowCacheRef.current).slice(0,3))
   }, [])
 
-  const scheduleShadowRead = useCallback((delay = 400) => {
+  const scheduleShadowRead = useCallback(() => {
     if (shadowReadTimerRef.current) clearTimeout(shadowReadTimerRef.current)
     shadowReadTimerRef.current = setTimeout(() => {
       readShadowPixels()
-      setShadowVersion(v => v + 1)
-    }, delay)
+    }, 400)
   }, [readShadowPixels])
 
   // ── Markers ───────────────────────────────────────────────────────────────
