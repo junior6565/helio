@@ -494,9 +494,30 @@ export default function App() {
 
   const scheduleShadowRead = useCallback(() => {
     if (shadowReadTimerRef.current) clearTimeout(shadowReadTimerRef.current)
-    shadowReadTimerRef.current = setTimeout(() => {
-      readShadowPixels()
-    }, 400)
+
+    let attempts = 0
+
+    const tryRead = () => {
+      attempts++
+      const canvases = mapContainer.current?.querySelectorAll('canvas')
+      const canvas = canvases?.[0]
+      if (!canvas) return
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      let pixelCount = 0
+      for (let x = 0; x < canvas.width; x += 30) {
+        for (let y = 0; y < canvas.height; y += 30) {
+          const p = ctx.getImageData(x, y, 1, 1).data
+          if (p[3] > 0) pixelCount++
+        }
+      }
+      if (pixelCount > 0 || attempts >= 10) {
+        readShadowPixels()
+      } else {
+        shadowReadTimerRef.current = setTimeout(tryRead, 300)
+      }
+    }
+
+    shadowReadTimerRef.current = setTimeout(tryRead, 500)
   }, [readShadowPixels])
 
   // ── Markers ───────────────────────────────────────────────────────────────
