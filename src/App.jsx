@@ -400,6 +400,8 @@ export default function App() {
     const sunTimes = getSunTimes(time, mapCenter.lat, mapCenter.lng)
     setSunInfo({ ...pos, score, ...label, ...sunTimes })
     setTimeSlots(generateTimeSlots(time, mapCenter.lat, mapCenter.lng))
+    shadowCacheRef.current = {}
+    console.log('[time] cleared cache, time:', time.toLocaleTimeString())
     shadowRendererRef.current?.update(time)
     scheduleShadowRead(2500)
   }, [time, mapCenter])
@@ -491,6 +493,8 @@ export default function App() {
 
 
     const totalRead = Object.keys(newCache).length
+    const sunnyInCache = Object.values(newCache).filter(Boolean).length
+    console.log('[readShadow] totalRead:', totalRead, 'sunny:', sunnyInCache, 'shadow:', totalRead - sunnyInCache)
     if (totalRead > 0) {
       shadowCacheRef.current = newCache
     }
@@ -591,14 +595,17 @@ export default function App() {
 
   // ── Dot color update on time change (sans recréer le DOM) ────────────────
   useEffect(() => {
+    let sunnyCount = 0
     Object.entries(markersRef.current).forEach(([id, { dot }]) => {
       const t = terracesRef.current.find(x => x.id === id)
       if (!t) return
       const sunny = getShadowStatus(t, time)
+      if (sunny) sunnyCount++
       const color = markerColor(sunny)
       dot.style.background = color
       dot.style.boxShadow = sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'
     })
+    console.log('[dotUpdate] time:', time.toLocaleTimeString(), 'markers:', Object.keys(markersRef.current).length, 'sunny:', sunnyCount)
   }, [time])
 
   // ── Selected marker style ─────────────────────────────────────────────────
