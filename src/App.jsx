@@ -531,6 +531,18 @@ export default function App() {
         })
 
       const el = marker.getElement()
+      if (el) {
+        const inner = el.firstElementChild
+        if (inner) {
+          inner.style.opacity = '0'
+          inner.style.transform = 'scale(0.5)'
+          requestAnimationFrame(() => {
+            inner.style.transition = 'opacity 0.25s ease, transform 0.25s ease'
+            inner.style.opacity = '1'
+            inner.style.transform = 'scale(1)'
+          })
+        }
+      }
       const dot = el?.querySelector('.mk-dot')
       const ring = el?.querySelector('.mk-ring')
       markersRef.current[terrace.id] = { marker, dot, ring }
@@ -600,7 +612,7 @@ export default function App() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div style={{ width: '100vw', height: '100dvh', position: 'relative', fontFamily: "'Inter', -apple-system, sans-serif" }}>
+    <div style={{ width: '100vw', height: '100dvh', position: 'relative', fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
 
       {/* Map — isolation:isolate contient les z-index Leaflet (jusqu'à 800) */}
       <div ref={mapContainer} style={{ position: 'absolute', inset: 0, zIndex: 0, isolation: 'isolate' }} />
@@ -619,6 +631,7 @@ export default function App() {
                 <div style={{ position: 'absolute', width: isMobile ? 16 : 20, height: isMobile ? 16 : 20, borderRadius: '50%', border: '2px solid #E8940A', background: 'transparent' }} />
                 <div style={{ position: 'absolute', width: isMobile ? 8 : 10, height: isMobile ? 8 : 10, borderRadius: '50%', background: '#E8940A' }} />
               </div>
+              <span style={{ fontSize: 15, fontWeight: 600, color: '#E8940A', letterSpacing: '-0.5px', marginLeft: 6, fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>helio</span>
               <div style={{ width: 1, height: 18, background: '#E5E7EB', flexShrink: 0 }} />
               <IconSearch size={16} color="#9CA3AF" />
               <input
@@ -643,7 +656,7 @@ export default function App() {
                   background: 'white',
                   color: '#374151',
                   border: '0.5px solid #E5E7EB',
-                  borderRadius: 8,
+                  borderRadius: 20,
                   padding: isMobile ? '6px 8px' : '6px 12px',
                   fontSize: isMobile ? 11 : 13,
                   fontWeight: 500,
@@ -670,7 +683,7 @@ export default function App() {
                 onClick={() => setShowPlanifier(v => !v)}
                 style={{
                   ...btnBase, background: '#E8940A', border: 'none',
-                  borderRadius: 8, padding: isMobile ? '0' : '5px 10px', gap: 5, flexShrink: 0,
+                  borderRadius: 20, padding: isMobile ? '0' : '5px 10px', gap: 5, flexShrink: 0,
                   color: '#fff', fontSize: 12, fontWeight: 600,
                   width: isMobile ? 34 : 'auto', height: isMobile ? 34 : 'auto',
                 }}
@@ -723,72 +736,24 @@ export default function App() {
             scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
             paddingBottom: 2,
           }}>
-            <button
-              onClick={() => setFilter(f => ({ ...f, onlyOpen: !f.onlyOpen }))}
-              style={{
-                ...btnBase,
-                background: filter.onlyOpen ? '#F59E0B' : '#fff',
-                border: `1px solid ${filter.onlyOpen ? '#F59E0B' : '#E5E7EB'}`,
+            {[
+              { label: 'Ouvert maintenant', active: filter.onlyOpen, onClick: () => setFilter(f => ({ ...f, onlyOpen: !f.onlyOpen })) },
+              { label: '4+ étoiles', active: filter.minRating >= 4, onClick: () => setFilter(f => ({ ...f, minRating: f.minRating >= 4 ? 0 : 4 })), icon: <IconStar size={11} color={filter.minRating >= 4 ? '#8B6914' : '#F59E0B'} /> },
+              { label: 'Bar', active: filter.type === 'bar', onClick: () => setFilter(f => ({ ...f, type: f.type === 'bar' ? 'all' : 'bar' })) },
+              { label: 'Café', active: filter.type === 'café', onClick: () => setFilter(f => ({ ...f, type: f.type === 'café' ? 'all' : 'café' })) },
+              { label: '☀️ Au soleil', active: filter.onlySunny, onClick: () => setFilter(f => ({ ...f, onlySunny: !f.onlySunny })) },
+            ].map(({ label, active, onClick, icon }) => (
+              <button key={label} onClick={onClick} style={{
+                ...btnBase, gap: 4,
+                background: active ? '#FFF7E6' : 'transparent',
+                border: active ? '1.5px solid #E8940A' : '1.5px solid #E5E7EB',
                 borderRadius: 20, padding: '5px 12px', whiteSpace: 'nowrap',
-                color: filter.onlyOpen ? '#fff' : '#374151',
-                fontSize: 12, fontWeight: 500, boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-              }}
-            >
-              Ouvert maintenant
-            </button>
-            <button
-              onClick={() => setFilter(f => ({ ...f, minRating: f.minRating >= 4 ? 0 : 4 }))}
-              style={{
-                ...btnBase,
-                background: filter.minRating >= 4 ? '#F59E0B' : '#fff',
-                border: `1px solid ${filter.minRating >= 4 ? '#F59E0B' : '#E5E7EB'}`,
-                borderRadius: 20, padding: '5px 12px', whiteSpace: 'nowrap',
-                color: filter.minRating >= 4 ? '#fff' : '#374151',
-                fontSize: 12, fontWeight: 500, gap: 4, boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-              }}
-            >
-              <IconStar size={11} color={filter.minRating >= 4 ? '#fff' : '#F59E0B'} />
-              4+ étoiles
-            </button>
-            <button
-              onClick={() => setFilter(f => ({ ...f, type: f.type === 'bar' ? 'all' : 'bar' }))}
-              style={{
-                ...btnBase,
-                background: filter.type === 'bar' ? '#3B82F6' : '#fff',
-                border: `1px solid ${filter.type === 'bar' ? '#3B82F6' : '#E5E7EB'}`,
-                borderRadius: 20, padding: '5px 12px', whiteSpace: 'nowrap',
-                color: filter.type === 'bar' ? '#fff' : '#374151',
-                fontSize: 12, fontWeight: 500, boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-              }}
-            >
-              Bar
-            </button>
-            <button
-              onClick={() => setFilter(f => ({ ...f, type: f.type === 'café' ? 'all' : 'café' }))}
-              style={{
-                ...btnBase,
-                background: filter.type === 'café' ? '#3B82F6' : '#fff',
-                border: `1px solid ${filter.type === 'café' ? '#3B82F6' : '#E5E7EB'}`,
-                borderRadius: 20, padding: '5px 12px', whiteSpace: 'nowrap',
-                color: filter.type === 'café' ? '#fff' : '#374151',
-                fontSize: 12, fontWeight: 500, boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-              }}
-            >
-              Café
-            </button>
-            <button
-              onClick={() => setFilter(f => ({ ...f, onlySunny: !f.onlySunny }))}
-              style={{
-                ...btnBase,
-                background: filter.onlySunny ? '#F59E0B' : '#fff',
-                border: `1px solid ${filter.onlySunny ? '#F59E0B' : '#E5E7EB'}`,
-                borderRadius: 20, padding: '5px 12px', whiteSpace: 'nowrap',
-                color: filter.onlySunny ? '#fff' : '#374151',
-                fontSize: 12, fontWeight: 500, boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-              }}
-            >
-              ☀️ Au soleil
-            </button>
+                color: active ? '#8B6914' : '#374151',
+                fontSize: 12, fontWeight: active ? 600 : 400,
+              }}>
+                {icon}{label}
+              </button>
+            ))}
           </div>
 
           {/* Bandeau mode planifier */}
@@ -814,9 +779,14 @@ export default function App() {
       {/* Sun widget — top left */}
       {sunInfo && (
         <div style={{
-          ...panel,
+          background: 'rgba(255,251,242,0.92)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          borderRadius: 16,
+          border: '0.5px solid rgba(232,148,10,0.2)',
+          boxShadow: 'none',
           position: 'absolute', top: 114, left: 12, zIndex: 1100,
-          padding: isMobile ? '8px 10px' : '12px 14px',
+          padding: isMobile ? '8px 10px' : '10px 14px',
           minWidth: isMobile ? 'auto' : 170,
         }}>
           <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>Soleil maintenant</div>
@@ -968,8 +938,8 @@ export default function App() {
         style={{
           position: 'absolute', bottom: 0, left: '50%',
           transform: `translateX(-50%) translateY(${selectedTerrace ? '0%' : '110%'})`,
-          background: '#FFFFFF', borderRadius: '16px 16px 0 0',
-          boxShadow: '0 -4px 28px rgba(0,0,0,0.14)',
+          background: '#FFFFFF', borderRadius: '20px 20px 0 0',
+          boxShadow: '0 -8px 40px rgba(0,0,0,0.10)',
           width: '100%', maxWidth: 480, zIndex: 1120,
           transition: 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
           maxHeight: isMobile ? '60vh' : 'none',
@@ -1022,9 +992,9 @@ export default function App() {
               <div style={{ marginBottom: 12 }}>
                 <div style={{
                   display: 'inline-flex', alignItems: 'center', gap: 8,
-                  padding: '8px 14px', borderRadius: 12,
-                  background: selectedSunny ? '#FEF3C7' : '#F3F4F6',
-                  border: `2px solid ${selectedSunny ? '#F59E0B' : '#D1D5DB'}`,
+                  padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600,
+                  background: selectedSunny ? 'linear-gradient(135deg, #FFF7E6 0%, #FEF0D0 100%)' : '#F3F4F6',
+                  border: selectedSunny ? '1.5px solid #E8940A' : '1.5px solid #D1D5DB',
                 }}>
                   {selectedSunny
                     ? <IconSun size={16} color="#F59E0B" />
@@ -1364,9 +1334,9 @@ export default function App() {
       {planifActif && (
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 1100,
-          background: '#fff', borderRadius: '16px 16px 0 0',
+          background: '#fff', borderRadius: '20px 20px 0 0',
           borderTop: '0.5px solid #E8D8B0',
-          boxShadow: '0 -4px 28px rgba(0,0,0,0.14)',
+          boxShadow: '0 -8px 40px rgba(0,0,0,0.10)',
           height: 180, display: 'flex', flexDirection: 'column',
         }}>
           {/* Drag bar */}
