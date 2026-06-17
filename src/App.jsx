@@ -494,6 +494,7 @@ export default function App() {
     const totalRead = Object.keys(newCache).length
     if (totalRead > 0) {
       shadowCacheRef.current = newCache
+      setShadowVersion(v => v + 1)
     }
   }, [])
 
