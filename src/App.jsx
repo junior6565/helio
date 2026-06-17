@@ -500,14 +500,22 @@ export default function App() {
     if (shadowReadTimerRef.current) clearTimeout(shadowReadTimerRef.current)
     shadowReadTimerRef.current = setTimeout(() => {
       readShadowPixels()
-      Object.entries(markersRef.current).forEach(([id, { dot }]) => {
-        const terrace = terracesRef.current.find(t => t.id === id)
-        if (!terrace || !dot) return
-        const sunny = getShadowStatus(terrace, timeRef.current)
-        dot.style.background = markerColor(sunny)
-        dot.style.boxShadow = sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'
+
+      requestAnimationFrame(() => {
+        Object.entries(markersRef.current).forEach(([id, { dot }]) => {
+          const terrace = terracesRef.current.find(t => t.id === id)
+          if (!terrace || !dot) return
+          const cached = shadowCacheRef.current[terrace.id]
+          const sunny = cached !== undefined
+            ? cached
+            : getShadowStatus(terrace, timeRef.current)
+          dot.style.background = markerColor(sunny)
+          dot.style.boxShadow = sunny
+            ? '0 2px 8px rgba(0,0,0,0.28)'
+            : '0 1px 4px rgba(0,0,0,0.15)'
+        })
+        setShadowVersion(v => v + 1)
       })
-      setShadowVersion(v => v + 1)
     }, delay)
   }, [readShadowPixels, getShadowStatus])
 
