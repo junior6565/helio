@@ -612,7 +612,7 @@ export default function App() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div style={{ width: '100vw', height: '100dvh', position: 'relative', fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
+    <div style={{ width: '100vw', height: '100dvh', position: 'relative', fontFamily: "'Space Grotesk', -apple-system, sans-serif" }}>
 
       {/* Map — isolation:isolate contient les z-index Leaflet (jusqu'à 800) */}
       <div ref={mapContainer} style={{ position: 'absolute', inset: 0, zIndex: 0, isolation: 'isolate' }} />
@@ -631,7 +631,7 @@ export default function App() {
                 <div style={{ position: 'absolute', width: isMobile ? 16 : 20, height: isMobile ? 16 : 20, borderRadius: '50%', border: '2px solid #E8940A', background: 'transparent' }} />
                 <div style={{ position: 'absolute', width: isMobile ? 8 : 10, height: isMobile ? 8 : 10, borderRadius: '50%', background: '#E8940A' }} />
               </div>
-              <span style={{ fontSize: 15, fontWeight: 600, color: '#E8940A', letterSpacing: '-0.5px', marginLeft: 6, fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>helio</span>
+              <span style={{ fontSize: 20, fontWeight: 700, color: '#E8940A', letterSpacing: '-1px', marginLeft: 6, fontFamily: "'Syne', sans-serif", flexShrink: 0 }}>helio</span>
               <div style={{ width: 1, height: 18, background: '#E5E7EB', flexShrink: 0 }} />
               <IconSearch size={16} color="#9CA3AF" />
               <input
@@ -966,7 +966,7 @@ export default function App() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                 <h2
                   onClick={() => setSheetExpanded(v => !v)}
-                  style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#1C1C1E', flex: 1, paddingRight: 8, lineHeight: 1.25, cursor: 'pointer' }}
+                  style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#1C1C1E', flex: 1, paddingRight: 8, lineHeight: 1.25, cursor: 'pointer', fontFamily: "'Syne', sans-serif", letterSpacing: '-0.5px' }}
                 >
                   {selectedTerrace.name}
                 </h2>
@@ -1345,7 +1345,7 @@ export default function App() {
           </div>
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px 8px' }}>
-            <span style={{ fontSize: 13, fontWeight: 500, color: '#1C1C1E' }}>Terrasses disponibles</span>
+            <span style={{ fontSize: 13, fontWeight: 500, color: '#1C1C1E', fontFamily: "'Syne', sans-serif" }}>Terrasses disponibles</span>
             <button
               onClick={() => {
                 setPlanifActif(false)
@@ -1377,7 +1377,7 @@ export default function App() {
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: '#1C1C1E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: '#1C1C1E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: "'Syne', sans-serif" }}>{t.name}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
                       {t.rating && (
                         <>
