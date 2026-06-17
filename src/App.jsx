@@ -490,7 +490,8 @@ export default function App() {
     })
 
 
-    if (ombreCount > 0) {
+    const totalRead = Object.keys(newCache).length
+    if (totalRead > 0) {
       shadowCacheRef.current = newCache
     }
   }, [])
