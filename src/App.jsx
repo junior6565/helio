@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import ReactDOM from 'react-dom'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import OSMBuildings from './utils/osm-buildings'
@@ -403,7 +402,7 @@ export default function App() {
     setTimeSlots(generateTimeSlots(time, mapCenter.lat, mapCenter.lng))
     shadowRendererRef.current?.update(time)
     scheduleShadowRead()
-  }, [time, mapCenter, scheduleShadowRead])
+  }, [time, mapCenter])
 
   const loadTerraces = useCallback(async (lat, lng, radius = 1000) => {
     setLoading(true)
@@ -514,7 +513,7 @@ export default function App() {
       }
       if (pixelCount > 0 || attempts >= 10) {
         readShadowPixels()
-        ReactDOM.flushSync(() => setShadowVersion(v => v + 1))
+        setShadowVersion(v => v + 1)
       } else {
         shadowReadTimerRef.current = setTimeout(tryRead, 300)
       }
