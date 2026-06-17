@@ -640,13 +640,13 @@ export default function App() {
                   loadTerraces(c.lat, c.lng, 800)
                 }}
                 style={{
-                  background: '#E8940A',
-                  color: 'white',
-                  border: 'none',
+                  background: 'white',
+                  color: '#374151',
+                  border: '0.5px solid #E5E7EB',
                   borderRadius: 8,
                   padding: isMobile ? '6px 8px' : '6px 12px',
                   fontSize: isMobile ? 11 : 13,
-                  fontWeight: 600,
+                  fontWeight: 500,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                   flexShrink: 0,
