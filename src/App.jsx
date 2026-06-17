@@ -268,6 +268,7 @@ export default function App() {
   const timeRef = useRef(null)
   const shadowReadTimerRef = useRef(null)
   const geoMarkerRef = useRef(null)
+  const baselineCacheRef = useRef({})
 
   const [time, setTime] = useState(() => {
     const now = new Date()
@@ -319,7 +320,6 @@ export default function App() {
   }, [isMobile])
 
   timeRef.current = time
-  console.log('[version] shadowVersion:', shadowVersion)
 
   // ── Map init ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -409,49 +409,23 @@ export default function App() {
     if (shadowReadTimerRef.current) clearTimeout(shadowReadTimerRef.current)
     if (!map.current || !mapContainer.current) return
 
-    const allCanvases = mapContainer.current.querySelectorAll('canvas')
-    const canvas = allCanvases[0]
+    const canvas = mapContainer.current.querySelectorAll('canvas')[0]
     if (!canvas || canvas.width === 0) return
-
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
 
-    // Checksum positionnel : détecte les changements de direction d'ombre
-    const getChecksum = (cvs, context) => {
-      let sum = 0
-      let idx = 1
-      const step = 20
-      for (let x = 0; x < cvs.width; x += step) {
-        for (let y = 0; y < cvs.height; y += step) {
-          sum += context.getImageData(x, y, 1, 1).data[3] * idx
-          idx++
+    const getChecksum = () => {
+      let sum = 0; let idx = 1
+      for (let x = 0; x < canvas.width; x += 20) {
+        for (let y = 0; y < canvas.height; y += 20) {
+          sum += ctx.getImageData(x, y, 1, 1).data[3] * idx++
         }
       }
       return sum
     }
 
-    const baseline = getChecksum(canvas, ctx)
-    console.log('[baseline] checksum:', baseline, 'time:', time.toLocaleTimeString(),
-      '| canvases:', allCanvases.length)
-
-    // Inspecter tous les canvases pour voir lequel change
-    const allBaselines = Array.from(allCanvases).map((c, i) => {
-      if (c.width === 0) return 0
-      const cx = c.getContext('2d', { willReadFrequently: true })
-      return cx ? getChecksum(c, cx) : 0
-    })
-    console.log('[baseline all]', allBaselines)
-
+    const before = getChecksum()
     shadowRendererRef.current?.update(time)
-
-    const afterUpdate = getChecksum(canvas, ctx)
-    const allAfter = Array.from(allCanvases).map((c, i) => {
-      if (c.width === 0) return 0
-      const cx = c.getContext('2d', { willReadFrequently: true })
-      return cx ? getChecksum(c, cx) : 0
-    })
-    console.log('[afterUpdate] checksum:', afterUpdate, 'changed:', afterUpdate !== baseline)
-    console.log('[afterUpdate all]', allAfter,
-      '| diffs:', allAfter.map((v, i) => v !== allBaselines[i] ? `canvas[${i}] CHANGED` : `canvas[${i}] same`))
+    const after = getChecksum()
 
     const applyCanvasData = () => {
       readShadowPixels()
@@ -464,20 +438,12 @@ export default function App() {
       })
     }
 
-    if (afterUpdate !== baseline) {
-      console.log('[changed] synchronously after update()')
-      applyCanvasData()
-      return
-    }
+    if (after !== before) { applyCanvasData(); return }
 
-    // Canvas[0] n'a pas changé synchroniquement — polling jusqu'à changement
     const startTime = Date.now()
     const poll = () => {
-      const current = getChecksum(canvas, ctx)
       const elapsed = Date.now() - startTime
-      console.log(`[poll] ${elapsed}ms checksum: ${current}`)
-      if (current !== baseline || elapsed >= 3000) {
-        console.log(`[done] ${current !== baseline ? 'canvas changed' : 'timeout 3s'} after ${elapsed}ms`)
+      if (getChecksum() !== before || elapsed >= 3000) {
         applyCanvasData()
       } else {
         shadowReadTimerRef.current = setTimeout(poll, 100)
@@ -486,10 +452,7 @@ export default function App() {
     shadowReadTimerRef.current = setTimeout(poll, 100)
 
     return () => {
-      if (shadowReadTimerRef.current) {
-        clearTimeout(shadowReadTimerRef.current)
-        shadowReadTimerRef.current = null
-      }
+      if (shadowReadTimerRef.current) { clearTimeout(shadowReadTimerRef.current); shadowReadTimerRef.current = null }
     }
   }, [time])
 
@@ -550,71 +513,45 @@ export default function App() {
 
   const readShadowPixels = useCallback(() => {
     if (!map.current || !mapContainer.current) return
-    const allCanvases = mapContainer.current.querySelectorAll('canvas')
-    if (!allCanvases.length) return
-
-    // Diagnostic : total opaque (alpha>30) sur chaque canvas
-    const step = 20
-    Array.from(allCanvases).forEach((c, i) => {
-      if (c.width === 0) return
-      const cx = c.getContext('2d', { willReadFrequently: true })
-      let total = 0
-      const maxSamples = Math.ceil(c.width / step) * Math.ceil(c.height / step)
-      for (let x = 0; x < c.width; x += step) {
-        for (let y = 0; y < c.height; y += step) {
-          if (cx.getImageData(x, y, 1, 1).data[3] > 30) total++
-        }
-      }
-      console.log(`[canvas${i}] opaque(>30): ${total}/${maxSamples}`)
-    })
-
-    // Terrace-level shadow count par canvas (3 premières terrasses)
-    const perCanvas = Array.from(allCanvases).map((c, ci) => {
-      if (c.width === 0) return '?'
-      const cx = c.getContext('2d', { willReadFrequently: true })
-      let shadows = 0
-      terracesRef.current.slice(0, 3).forEach(terrace => {
-        const pt = map.current.latLngToContainerPoint([terrace.lat, terrace.lng])
-        const x = Math.round(pt.x); const y = Math.round(pt.y)
-        let opaque = 0
-        for (let dx = -10; dx <= 10; dx++) {
-          for (let dy = -10; dy <= 10; dy++) {
-            const px = x + dx; const py = y + dy
-            if (px >= 0 && py >= 0 && px < c.width && py < c.height) {
-              if (cx.getImageData(px, py, 1, 1).data[3] > 30) opaque++
-            }
-          }
-        }
-        if (opaque >= 3) shadows++
-      })
-      return shadows
-    })
-    console.log('[terrace c0/c1/c2 (3 first, shadow>=3)]:', perCanvas.join(' / '))
-
-    // Lecture principale sur canvas[0] — alpha>30 pour exclure le halo de blur
-    const canvas = allCanvases[0]
+    const canvas = mapContainer.current.querySelectorAll('canvas')[0]
     if (!canvas || canvas.width === 0) return
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    const newCache = {}
-    let ombreCount = 0
 
-    terracesRef.current.forEach(terrace => {
-      const pt = map.current.latLngToContainerPoint([terrace.lat, terrace.lng])
-      const x = Math.round(pt.x)
-      const y = Math.round(pt.y)
-      if (x < 0 || y < 0 || x > canvas.width || y > canvas.height) return
-      let opaqueCount = 0
+    const countOpaque = (x, y) => {
+      let count = 0
       for (let dx = -10; dx <= 10; dx++) {
         for (let dy = -10; dy <= 10; dy++) {
-          const px = x + dx
-          const py = y + dy
+          const px = x + dx; const py = y + dy
           if (px < 0 || py < 0 || px >= canvas.width || py >= canvas.height) continue
-          if (ctx.getImageData(px, py, 1, 1).data[3] > 30) opaqueCount++
+          if (ctx.getImageData(px, py, 1, 1).data[3] > 30) count++
         }
       }
-      const isInShadow = opaqueCount >= 3
-      if (isInShadow) ombreCount++
-      newCache[terrace.id] = !isInShadow
+      return count
+    }
+
+    // Baseline à midi : lit une fois par lot de terrasses, stocke dans baselineCacheRef
+    const needsBaseline = terracesRef.current.some(t => baselineCacheRef.current[t.id] === undefined)
+    if (needsBaseline && osmbRef.current) {
+      const noon = new Date(timeRef.current)
+      noon.setHours(12, 0, 0, 0)
+      osmbRef.current.date(noon)
+      terracesRef.current.forEach(terrace => {
+        const pt = map.current.latLngToContainerPoint([terrace.lat, terrace.lng])
+        const x = Math.round(pt.x); const y = Math.round(pt.y)
+        if (x < 0 || y < 0 || x > canvas.width || y > canvas.height) return
+        baselineCacheRef.current[terrace.id] = countOpaque(x, y)
+      })
+      osmbRef.current.date(timeRef.current)
+    }
+
+    const newCache = {}
+    terracesRef.current.forEach(terrace => {
+      const pt = map.current.latLngToContainerPoint([terrace.lat, terrace.lng])
+      const x = Math.round(pt.x); const y = Math.round(pt.y)
+      if (x < 0 || y < 0 || x > canvas.width || y > canvas.height) return
+      const opaqueCount = countOpaque(x, y)
+      const baseline = baselineCacheRef.current[terrace.id] ?? 0
+      newCache[terrace.id] = (opaqueCount - baseline) < 8
     })
 
     const totalRead = Object.keys(newCache).length
