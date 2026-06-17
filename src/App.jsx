@@ -401,7 +401,6 @@ export default function App() {
     setSunInfo({ ...pos, score, ...label, ...sunTimes })
     setTimeSlots(generateTimeSlots(time, mapCenter.lat, mapCenter.lng))
     shadowCacheRef.current = {}
-    console.log('[time] cleared cache, time:', time.toLocaleTimeString())
     shadowRendererRef.current?.update(time)
     scheduleShadowRead(2500)
   }, [time, mapCenter])
@@ -462,12 +461,10 @@ export default function App() {
   }, [])
 
   const readShadowPixels = useCallback(() => {
-    console.log('[read] called')
-    if (!map.current || !mapContainer.current) { console.log('[read] no map'); return }
+    if (!map.current || !mapContainer.current) return
     const canvases = mapContainer.current.querySelectorAll('canvas')
-    console.log('[read] canvases found:', canvases.length, canvases[0]?.width, 'x', canvases[0]?.height)
     const canvas = canvases[0]
-    if (!canvas || canvas.width === 0) { console.log('[read] canvas invalid'); return }
+    if (!canvas || canvas.width === 0) return
 
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
     const newCache = {}
@@ -495,8 +492,6 @@ export default function App() {
 
 
     const totalRead = Object.keys(newCache).length
-    const sunnyInCache = Object.values(newCache).filter(Boolean).length
-    console.log('[readShadow] totalRead:', totalRead, 'sunny:', sunnyInCache, 'shadow:', totalRead - sunnyInCache)
     if (totalRead > 0) {
       shadowCacheRef.current = newCache
     }
@@ -504,9 +499,7 @@ export default function App() {
 
   const scheduleShadowRead = useCallback((delay = 400) => {
     if (shadowReadTimerRef.current) clearTimeout(shadowReadTimerRef.current)
-    console.log('[sched] scheduling read in', delay, 'ms')
     shadowReadTimerRef.current = setTimeout(() => {
-      console.log('[sched] timer fired, delay was', delay)
       readShadowPixels()
       Object.entries(markersRef.current).forEach(([id, { dot }]) => {
         const terrace = terracesRef.current.find(t => t.id === id)
@@ -515,7 +508,6 @@ export default function App() {
         dot.style.background = markerColor(sunny)
         dot.style.boxShadow = sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'
       })
-      setTerraces(t => [...t])
     }, delay)
   }, [readShadowPixels, getShadowStatus])
 
@@ -599,17 +591,14 @@ export default function App() {
 
   // ── Dot color update on time change (sans recréer le DOM) ────────────────
   useEffect(() => {
-    let sunnyCount = 0
     Object.entries(markersRef.current).forEach(([id, { dot }]) => {
       const t = terracesRef.current.find(x => x.id === id)
       if (!t) return
       const sunny = getShadowStatus(t, time)
-      if (sunny) sunnyCount++
       const color = markerColor(sunny)
       dot.style.background = color
       dot.style.boxShadow = sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'
     })
-    console.log('[dotUpdate] time:', time.toLocaleTimeString(), 'markers:', Object.keys(markersRef.current).length, 'sunny:', sunnyCount)
   }, [time])
 
   // ── Selected marker style ─────────────────────────────────────────────────
