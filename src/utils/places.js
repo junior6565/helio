@@ -123,6 +123,17 @@ export async function fetchNearbyTerraces(lat, lng, radiusMeters = 1000, apiKey)
     return getMockTerraces(lat, lng)
   }
 
+  const cacheKey = `helio_places_${Math.round(lat * 100) / 100}_${Math.round(lng * 100) / 100}`
+  try {
+    const cached = localStorage.getItem(cacheKey)
+    if (cached) {
+      const { data, timestamp } = JSON.parse(cached)
+      if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
+        return data
+      }
+    }
+  } catch {}
+
   try {
     const subCenters = getSubCenters(lat, lng, radiusMeters)
     const subRadius = radiusMeters / 2
@@ -135,16 +146,12 @@ export async function fetchNearbyTerraces(lat, lng, radiusMeters = 1000, apiKey)
       )
     )
 
-    // Flatten and log per-request stats
     const allRaw = []
     for (let i = 0; i < results.length; i++) {
       if (results[i].status !== 'fulfilled') continue
-      const { subIdx } = requests[i]
-      const places = results[i].value
-      allRaw.push(...places)
+      allRaw.push(...results[i].value)
     }
 
-    // Deduplicate by place id, map to internal format, cap at 300
     const seen = new Set()
     const deduped = []
     for (const place of allRaw) {
@@ -154,7 +161,13 @@ export async function fetchNearbyTerraces(lat, lng, radiusMeters = 1000, apiKey)
       if (deduped.length >= 500) break
     }
 
-    return deduped.filter(p => distanceMeters(lat, lng, p.lat, p.lng) <= radiusMeters)
+    const filtered = deduped.filter(p => distanceMeters(lat, lng, p.lat, p.lng) <= radiusMeters)
+
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify({ data: filtered, timestamp: Date.now() }))
+    } catch {}
+
+    return filtered
   } catch (err) {
     console.error('Places API failed, using mock data:', err)
     return getMockTerraces(lat, lng)
