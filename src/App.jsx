@@ -319,6 +319,7 @@ export default function App() {
   }, [isMobile])
 
   timeRef.current = time
+  console.log('[version] shadowVersion:', shadowVersion)
 
   // ── Map init ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -392,7 +393,7 @@ export default function App() {
     }
   }, [])
 
-  // ── Sun position + shadow update ──────────────────────────────────────────
+  // ── Sun position update ───────────────────────────────────────────────────
   useEffect(() => {
     const pos = getSunPosition(time, mapCenter.lat, mapCenter.lng)
     const score = getSunScore(time, mapCenter.lat, mapCenter.lng)
@@ -400,10 +401,28 @@ export default function App() {
     const sunTimes = getSunTimes(time, mapCenter.lat, mapCenter.lng)
     setSunInfo({ ...pos, score, ...label, ...sunTimes })
     setTimeSlots(generateTimeSlots(time, mapCenter.lat, mapCenter.lng))
+  }, [time, mapCenter])
+
+  // ── Shadow update on time change ──────────────────────────────────────────
+  // OSM Buildings z.render() est synchrone : le canvas est prêt dès l'appel.
+  // On lit via requestAnimationFrame pour s'assurer que le browser a peint.
+  useEffect(() => {
+    console.log('[time] shadow effect fired', time.toLocaleTimeString())
     shadowCacheRef.current = {}
     shadowRendererRef.current?.update(time)
-    scheduleShadowRead(2500)
-  }, [time, mapCenter])
+    const raf = requestAnimationFrame(() => {
+      console.log('[raf] reading canvas')
+      readShadowPixels()
+      Object.entries(markersRef.current).forEach(([id, { dot }]) => {
+        const terrace = terracesRef.current.find(t => t.id === id)
+        if (!terrace || !dot) return
+        const sunny = getShadowStatus(terrace, timeRef.current)
+        dot.style.background = markerColor(sunny)
+        dot.style.boxShadow = sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'
+      })
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [time])
 
   const loadTerraces = useCallback(async (lat, lng, radius = 1000) => {
     setLoading(true)
@@ -492,6 +511,8 @@ export default function App() {
 
 
     const totalRead = Object.keys(newCache).length
+    const sunnyCount = Object.values(newCache).filter(Boolean).length
+    console.log('[readShadow] totalRead:', totalRead, 'sunny:', sunnyCount, 'shadow:', totalRead - sunnyCount)
     if (totalRead > 0) {
       shadowCacheRef.current = newCache
       setShadowVersion(v => v + 1)
