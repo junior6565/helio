@@ -403,7 +403,7 @@ export default function App() {
     setTimeSlots(generateTimeSlots(time, mapCenter.lat, mapCenter.lng))
     shadowRendererRef.current?.update(time)
     scheduleShadowRead()
-  }, [time, mapCenter])
+  }, [time, mapCenter, scheduleShadowRead])
 
   const loadTerraces = useCallback(async (lat, lng, radius = 1000) => {
     setLoading(true)
