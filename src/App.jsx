@@ -550,14 +550,53 @@ export default function App() {
 
   const readShadowPixels = useCallback(() => {
     if (!map.current || !mapContainer.current) return
-    const canvases = mapContainer.current.querySelectorAll('canvas')
-    const canvas = canvases[0]
-    if (!canvas || canvas.width === 0) return
+    const allCanvases = mapContainer.current.querySelectorAll('canvas')
+    if (!allCanvases.length) return
 
+    // Diagnostic : total opaque (alpha>30) sur chaque canvas
+    const step = 20
+    Array.from(allCanvases).forEach((c, i) => {
+      if (c.width === 0) return
+      const cx = c.getContext('2d', { willReadFrequently: true })
+      let total = 0
+      const maxSamples = Math.ceil(c.width / step) * Math.ceil(c.height / step)
+      for (let x = 0; x < c.width; x += step) {
+        for (let y = 0; y < c.height; y += step) {
+          if (cx.getImageData(x, y, 1, 1).data[3] > 30) total++
+        }
+      }
+      console.log(`[canvas${i}] opaque(>30): ${total}/${maxSamples}`)
+    })
+
+    // Terrace-level shadow count par canvas (3 premières terrasses)
+    const perCanvas = Array.from(allCanvases).map((c, ci) => {
+      if (c.width === 0) return '?'
+      const cx = c.getContext('2d', { willReadFrequently: true })
+      let shadows = 0
+      terracesRef.current.slice(0, 3).forEach(terrace => {
+        const pt = map.current.latLngToContainerPoint([terrace.lat, terrace.lng])
+        const x = Math.round(pt.x); const y = Math.round(pt.y)
+        let opaque = 0
+        for (let dx = -10; dx <= 10; dx++) {
+          for (let dy = -10; dy <= 10; dy++) {
+            const px = x + dx; const py = y + dy
+            if (px >= 0 && py >= 0 && px < c.width && py < c.height) {
+              if (cx.getImageData(px, py, 1, 1).data[3] > 30) opaque++
+            }
+          }
+        }
+        if (opaque >= 3) shadows++
+      })
+      return shadows
+    })
+    console.log('[terrace c0/c1/c2 (3 first, shadow>=3)]:', perCanvas.join(' / '))
+
+    // Lecture principale sur canvas[0] — alpha>30 pour exclure le halo de blur
+    const canvas = allCanvases[0]
+    if (!canvas || canvas.width === 0) return
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
     const newCache = {}
     let ombreCount = 0
-    let debugIdx = 0
 
     terracesRef.current.forEach(terrace => {
       const pt = map.current.latLngToContainerPoint([terrace.lat, terrace.lng])
@@ -570,21 +609,8 @@ export default function App() {
           const px = x + dx
           const py = y + dy
           if (px < 0 || py < 0 || px >= canvas.width || py >= canvas.height) continue
-          const p = ctx.getImageData(px, py, 1, 1).data
-          if (p[3] > 0) opaqueCount++
+          if (ctx.getImageData(px, py, 1, 1).data[3] > 30) opaqueCount++
         }
-      }
-      if (debugIdx < 3) {
-        const samples = []
-        for (let dx = -5; dx <= 5; dx += 2) {
-          for (let dy = -5; dy <= 5; dy += 2) {
-            const px = x + dx; const py = y + dy
-            if (px >= 0 && py >= 0 && px < canvas.width && py < canvas.height)
-              samples.push(ctx.getImageData(px, py, 1, 1).data[3])
-          }
-        }
-        console.log(`[t${debugIdx}] px(${x},${y}) opaque:${opaqueCount}/441 alphas:[${samples.join(',')}]`)
-        debugIdx++
       }
       const isInShadow = opaqueCount >= 3
       if (isInShadow) ombreCount++
