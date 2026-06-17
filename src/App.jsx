@@ -404,14 +404,56 @@ export default function App() {
   }, [time, mapCenter])
 
   // ── Shadow update on time change ──────────────────────────────────────────
-  // OSM Buildings z.render() est synchrone : le canvas est prêt dès l'appel.
-  // On lit via requestAnimationFrame pour s'assurer que le browser a peint.
   useEffect(() => {
-    console.log('[time] shadow effect fired', time.toLocaleTimeString())
     shadowCacheRef.current = {}
+    if (shadowReadTimerRef.current) clearTimeout(shadowReadTimerRef.current)
+    if (!map.current || !mapContainer.current) return
+
+    const allCanvases = mapContainer.current.querySelectorAll('canvas')
+    const canvas = allCanvases[0]
+    if (!canvas || canvas.width === 0) return
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+
+    // Checksum positionnel : détecte les changements de direction d'ombre
+    const getChecksum = (cvs, context) => {
+      let sum = 0
+      let idx = 1
+      const step = 20
+      for (let x = 0; x < cvs.width; x += step) {
+        for (let y = 0; y < cvs.height; y += step) {
+          sum += context.getImageData(x, y, 1, 1).data[3] * idx
+          idx++
+        }
+      }
+      return sum
+    }
+
+    const baseline = getChecksum(canvas, ctx)
+    console.log('[baseline] checksum:', baseline, 'time:', time.toLocaleTimeString(),
+      '| canvases:', allCanvases.length)
+
+    // Inspecter tous les canvases pour voir lequel change
+    const allBaselines = Array.from(allCanvases).map((c, i) => {
+      if (c.width === 0) return 0
+      const cx = c.getContext('2d', { willReadFrequently: true })
+      return cx ? getChecksum(c, cx) : 0
+    })
+    console.log('[baseline all]', allBaselines)
+
     shadowRendererRef.current?.update(time)
-    const raf = requestAnimationFrame(() => {
-      console.log('[raf] reading canvas')
+
+    const afterUpdate = getChecksum(canvas, ctx)
+    const allAfter = Array.from(allCanvases).map((c, i) => {
+      if (c.width === 0) return 0
+      const cx = c.getContext('2d', { willReadFrequently: true })
+      return cx ? getChecksum(c, cx) : 0
+    })
+    console.log('[afterUpdate] checksum:', afterUpdate, 'changed:', afterUpdate !== baseline)
+    console.log('[afterUpdate all]', allAfter,
+      '| diffs:', allAfter.map((v, i) => v !== allBaselines[i] ? `canvas[${i}] CHANGED` : `canvas[${i}] same`))
+
+    const applyCanvasData = () => {
       readShadowPixels()
       Object.entries(markersRef.current).forEach(([id, { dot }]) => {
         const terrace = terracesRef.current.find(t => t.id === id)
@@ -420,8 +462,35 @@ export default function App() {
         dot.style.background = markerColor(sunny)
         dot.style.boxShadow = sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'
       })
-    })
-    return () => cancelAnimationFrame(raf)
+    }
+
+    if (afterUpdate !== baseline) {
+      console.log('[changed] synchronously after update()')
+      applyCanvasData()
+      return
+    }
+
+    // Canvas[0] n'a pas changé synchroniquement — polling jusqu'à changement
+    const startTime = Date.now()
+    const poll = () => {
+      const current = getChecksum(canvas, ctx)
+      const elapsed = Date.now() - startTime
+      console.log(`[poll] ${elapsed}ms checksum: ${current}`)
+      if (current !== baseline || elapsed >= 3000) {
+        console.log(`[done] ${current !== baseline ? 'canvas changed' : 'timeout 3s'} after ${elapsed}ms`)
+        applyCanvasData()
+      } else {
+        shadowReadTimerRef.current = setTimeout(poll, 100)
+      }
+    }
+    shadowReadTimerRef.current = setTimeout(poll, 100)
+
+    return () => {
+      if (shadowReadTimerRef.current) {
+        clearTimeout(shadowReadTimerRef.current)
+        shadowReadTimerRef.current = null
+      }
+    }
   }, [time])
 
   const loadTerraces = useCallback(async (lat, lng, radius = 1000) => {
