@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import ReactDOM from 'react-dom'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import OSMBuildings from './utils/osm-buildings'
@@ -513,7 +514,7 @@ export default function App() {
       }
       if (pixelCount > 0 || attempts >= 10) {
         readShadowPixels()
-        setShadowVersion(v => v + 1)
+        ReactDOM.flushSync(() => setShadowVersion(v => v + 1))
       } else {
         shadowReadTimerRef.current = setTimeout(tryRead, 300)
       }
@@ -525,6 +526,7 @@ export default function App() {
   // ── Markers ───────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!mapReady || !map.current) return
+    console.log('[markers] render, shadowVersion:', shadowVersion, 'time:', timeRef.current)
 
     terracesRef.current = terraces
 
