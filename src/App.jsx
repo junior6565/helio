@@ -299,6 +299,10 @@ export default function App() {
   const [planifActif, setPlanifActif] = useState(false)
   const [planifResultats, setPlanifResultats] = useState([])
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [terraceConfirmations, setTerraceConfirmations] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('helio_terrace_confirmations') || '{}') }
+    catch { return {} }
+  })
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768)
@@ -1059,22 +1063,70 @@ export default function App() {
                   </span>
                 </div>
               </div>
-              {/* Terrasse non confirmée */}
-              {selectedTerrace?.hasOutdoorSeating === null && (
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: -4, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
-                  <IconHelp size={12} color="#9CA3AF" />
-                  Terrasse non confirmée
-                  <button
-                    onClick={() => {
-                      localStorage.setItem(`helio_terrace_${selectedTerrace.id}`, 'true')
-                      setSelectedTerrace(t => ({ ...t, hasOutdoorSeating: true }))
-                    }}
-                    style={{ marginLeft: 4, fontSize: 11, color: '#E8940A', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500, padding: 0 }}
-                  >
-                    ✓ Il y a une terrasse
-                  </button>
-                </div>
-              )}
+              {/* Confirmation terrasse communautaire */}
+              {selectedTerrace && (() => {
+                const confirmation = terraceConfirmations[selectedTerrace.id]
+                const hasOutdoor = selectedTerrace.hasOutdoorSeating
+
+                if (confirmation === 'confirmed') {
+                  return (
+                    <div style={{ marginTop: 8, fontSize: 11, color: '#E8940A', fontWeight: 500 }}>
+                      ✓ Terrasse confirmée par la communauté
+                    </div>
+                  )
+                }
+
+                if (confirmation === 'denied' || hasOutdoor === false) return null
+
+                if (hasOutdoor === null && !confirmation) {
+                  return (
+                    <div style={{
+                      marginTop: 10,
+                      background: '#FFFBF2', border: '1px solid #E8D8B0',
+                      borderRadius: 12, padding: '12px 14px',
+                    }}>
+                      <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 10px', lineHeight: 1.5 }}>
+                        Nous ne pouvons pas garantir que cet établissement dispose d'une terrasse. Le savez-vous ?
+                      </p>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          onClick={() => {
+                            const updated = { ...terraceConfirmations, [selectedTerrace.id]: 'confirmed' }
+                            setTerraceConfirmations(updated)
+                            localStorage.setItem('helio_terrace_confirmations', JSON.stringify(updated))
+                          }}
+                          style={{
+                            flex: 1, background: '#E8940A', border: 'none',
+                            borderRadius: 20, padding: '8px 0', fontSize: 12,
+                            color: 'white', fontWeight: 500, cursor: 'pointer',
+                            fontFamily: "'Space Grotesk', sans-serif",
+                          }}
+                        >
+                          Oui, il y en a une
+                        </button>
+                        <button
+                          onClick={() => {
+                            const updated = { ...terraceConfirmations, [selectedTerrace.id]: 'denied' }
+                            setTerraceConfirmations(updated)
+                            localStorage.setItem('helio_terrace_confirmations', JSON.stringify(updated))
+                            setSelectedTerrace(null)
+                          }}
+                          style={{
+                            flex: 1, background: 'white', border: '1px solid #E5E7EB',
+                            borderRadius: 20, padding: '8px 0', fontSize: 12,
+                            color: '#6B7280', cursor: 'pointer',
+                            fontFamily: "'Space Grotesk', sans-serif",
+                          }}
+                        >
+                          Non, pas de terrasse
+                        </button>
+                      </div>
+                    </div>
+                  )
+                }
+
+                return null
+              })()}
               {/* Ligne 4 : slider */}
               <div style={{ borderTop: '1px solid #F3F4F6', paddingTop: 12 }}>
                 <TimeSlider time={time} timeSlots={timeSlots} onChange={handleTimeChange} />
