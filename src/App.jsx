@@ -462,10 +462,12 @@ export default function App() {
   }, [])
 
   const readShadowPixels = useCallback(() => {
-    if (!map.current || !mapContainer.current) return
+    console.log('[read] called')
+    if (!map.current || !mapContainer.current) { console.log('[read] no map'); return }
     const canvases = mapContainer.current.querySelectorAll('canvas')
+    console.log('[read] canvases found:', canvases.length, canvases[0]?.width, 'x', canvases[0]?.height)
     const canvas = canvases[0]
-    if (!canvas || canvas.width === 0) return
+    if (!canvas || canvas.width === 0) { console.log('[read] canvas invalid'); return }
 
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
     const newCache = {}
@@ -502,7 +504,9 @@ export default function App() {
 
   const scheduleShadowRead = useCallback((delay = 400) => {
     if (shadowReadTimerRef.current) clearTimeout(shadowReadTimerRef.current)
+    console.log('[sched] scheduling read in', delay, 'ms')
     shadowReadTimerRef.current = setTimeout(() => {
+      console.log('[sched] timer fired, delay was', delay)
       readShadowPixels()
       Object.entries(markersRef.current).forEach(([id, { dot }]) => {
         const terrace = terracesRef.current.find(t => t.id === id)
