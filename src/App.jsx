@@ -735,24 +735,17 @@ export default function App() {
           {/* TOPBAR */}
           <div className="topbar" style={{
             background: '#D4500A',
-            padding: isMobile ? '14px 16px 12px' : '18px 20px 16px',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-            position: 'relative', overflow: 'hidden',
+            padding: '8px 16px',
+            display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+            gap: 8, position: 'relative', overflow: 'hidden',
           }}>
-            {/* Soleil géométrique */}
-            <div style={{ position: 'relative', width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
-              <div style={{ position: 'absolute', width: 56, height: 56, borderRadius: '50%', background: 'rgba(245,230,200,0.15)', boxShadow: '0 0 0 8px rgba(245,230,200,0.08), 0 0 0 16px rgba(245,230,200,0.04)' }} />
-              <div style={{ position: 'absolute', width: 48, height: 48, borderRadius: '50%', border: '2.5px solid #F5E6C8' }} />
-              <div style={{ position: 'absolute', width: 32, height: 32, borderRadius: '50%', border: '2px solid #F5E6C8', opacity: 0.8 }} />
-              <div style={{ position: 'absolute', width: 14, height: 14, borderRadius: '50%', background: '#F5E6C8', boxShadow: '0 0 12px rgba(245,230,200,0.6)' }} />
+            <div style={{ position: 'relative', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ position: 'absolute', width: 26, height: 26, borderRadius: '50%', border: '2px solid #F5E6C8' }} />
+              <div style={{ position: 'absolute', width: 17, height: 17, borderRadius: '50%', border: '1.5px solid #F5E6C8', opacity: 0.85 }} />
+              <div style={{ position: 'absolute', width: 7, height: 7, borderRadius: '50%', background: '#F5E6C8', boxShadow: '0 0 6px rgba(245,230,200,0.6)' }} />
             </div>
-            {/* Titre */}
-            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isMobile ? 36 : 40, color: '#F5E6C8', letterSpacing: 6, lineHeight: 1, zIndex: 1, textShadow: '3px 3px 0px rgba(0,0,0,0.2)' }}>
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 24, color: '#F5E6C8', letterSpacing: 4, lineHeight: 1, textShadow: '2px 2px 0px rgba(0,0,0,0.2)' }}>
               HELIO
-            </span>
-            {/* Sous-titre */}
-            <span style={{ fontSize: 9, color: 'rgba(245,230,200,0.6)', letterSpacing: 4, textTransform: 'uppercase', zIndex: 1, marginTop: -6 }}>
-              Paris · Terrasses au soleil
             </span>
           </div>
 
@@ -885,33 +878,30 @@ export default function App() {
         </div>
       </div>
 
-      {/* Bouton "Rechercher dans cette zone" */}
-      {showSearchHere && (
-        <div style={{
-          position: 'absolute',
-          top: isMobile ? 140 : 150,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1100,
-        }}>
-          <button
-            onClick={() => {
-              const c = map.current.getCenter()
-              loadTerraces(c.lat, c.lng, 800)
-              setShowSearchHere(false)
-            }}
-            style={{
-              background: '#1C0F06', border: '2px solid #D4500A', borderRadius: 4,
-              padding: '7px 18px', fontSize: 13,
-              color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 2,
-              cursor: 'pointer', boxShadow: '3px 3px 0px #D4500A',
-              display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
-            }}
-          >
-            ↻ RECHERCHER ICI
-          </button>
-        </div>
-      )}
+      {/* Bouton "Rechercher dans cette zone" — ancré dans la map */}
+      <div style={{
+        position: 'absolute', bottom: 14, left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 1100,
+        display: showSearchHere ? 'flex' : 'none',
+      }}>
+        <button
+          onClick={() => {
+            const c = map.current.getCenter()
+            loadTerraces(c.lat, c.lng, 800)
+            setShowSearchHere(false)
+          }}
+          style={{
+            background: '#1C0F06', border: '2px solid #D4500A', borderRadius: 4,
+            padding: '7px 18px', fontSize: 13,
+            color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 2,
+            cursor: 'pointer', boxShadow: '3px 3px 0px #D4500A',
+            display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
+          }}
+        >
+          ↻ RECHERCHER ICI
+        </button>
+      </div>
 
       {/* Sun widget */}
       {sunInfo && (
