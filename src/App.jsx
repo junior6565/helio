@@ -1393,21 +1393,25 @@ export default function App() {
         const lat = selectedTerrace.lat
         const lng = selectedTerrace.lng
         const nom = encodeURIComponent(selectedTerrace.name)
+        const cityFallback = `https://citymapper.com/trip/import?endcoord=${encodeURIComponent(`${lat},${lng}`)}&endname=${nom}`
         const options = [
           {
             icon: <IconMap size={18} color="#D4500A" />,
             label: 'APPLE PLANS',
-            url: `maps://maps.apple.com/?daddr=${lat},${lng}&q=${nom}`,
+            onTap: () => window.open(`maps://maps.apple.com/?daddr=${lat},${lng}&q=${nom}`, '_blank'),
           },
           {
             icon: <IconMapPin size={18} color="#D4500A" />,
             label: 'GOOGLE MAPS',
-            url: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+            onTap: () => window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank'),
           },
           {
             icon: <IconRoute size={18} color="#D4500A" />,
             label: 'CITYMAPPER',
-            url: `https://citymapper.com/directions?endcoord=${lat},${lng}&endname=${nom}`,
+            onTap: () => {
+              window.location = `citymapper://directions?endcoord=${lat},${lng}&endname=${nom}`
+              setTimeout(() => window.open(cityFallback, '_blank'), 500)
+            },
           },
         ]
         return (
@@ -1431,7 +1435,7 @@ export default function App() {
                 {options.map((opt, i) => (
                   <button
                     key={opt.label}
-                    onClick={() => { window.open(opt.url, '_blank'); setShowItineraireModal(false) }}
+                    onClick={() => { opt.onTap(); setShowItineraireModal(false) }}
                     style={{
                       ...btnBase, width: '100%', padding: '16px 20px', gap: 14,
                       justifyContent: 'flex-start',
