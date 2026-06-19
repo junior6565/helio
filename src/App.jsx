@@ -254,6 +254,7 @@ export default function App() {
   const shadowReadTimerRef = useRef(null)
   const geoMarkerRef = useRef(null)
   const baselineCacheRef = useRef({})
+  const shadowScheduleRef = useRef({})
 
   const [time, setTime] = useState(() => {
     const now = new Date()
@@ -544,10 +545,53 @@ export default function App() {
     }
   }, [])
 
+  const buildShadowSchedule = useCallback(() => {
+    if (!map.current || !mapContainer.current || !osmbRef.current) return
+    const canvas = mapContainer.current.querySelectorAll('canvas')[0]
+    if (!canvas || canvas.width === 0) return
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+
+    const countFast = (x, y) => {
+      const d = ctx.getImageData(Math.max(0, x - 10), Math.max(0, y - 10), 21, 21).data
+      let c = 0
+      for (let i = 3; i < d.length; i += 4) if (d[i] > 30) c++
+      return c
+    }
+
+    const base = new Date(timeRef.current)
+    const slots = []
+    for (let h = 6; h <= 22; h++) {
+      for (const m of [0, 30]) {
+        const slot = new Date(base)
+        slot.setHours(h, m, 0, 0)
+        slots.push(slot)
+      }
+    }
+
+    const newSchedule = {}
+    slots.forEach(slot => {
+      osmbRef.current.date(slot)
+      const key = slot.getHours() * 100 + slot.getMinutes()
+      terracesRef.current.forEach(terrace => {
+        const pt = map.current.latLngToContainerPoint([terrace.lat, terrace.lng])
+        const x = Math.round(pt.x); const y = Math.round(pt.y)
+        if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) return
+        const opaqueCount = countFast(x, y)
+        const baseline = baselineCacheRef.current[terrace.id] ?? 0
+        if (!newSchedule[terrace.id]) newSchedule[terrace.id] = {}
+        newSchedule[terrace.id][key] = (opaqueCount - baseline) < 8
+      })
+    })
+
+    osmbRef.current.date(timeRef.current)
+    shadowScheduleRef.current = newSchedule
+  }, [])
+
   const scheduleShadowRead = useCallback((delay = 400) => {
     if (shadowReadTimerRef.current) clearTimeout(shadowReadTimerRef.current)
     shadowReadTimerRef.current = setTimeout(() => {
       readShadowPixels()
+      buildShadowSchedule()
       Object.entries(markersRef.current).forEach(([id, { dot }]) => {
         const terrace = terracesRef.current.find(t => t.id === id)
         if (!terrace || !dot) return
@@ -558,23 +602,40 @@ export default function App() {
           : '0 2px 6px rgba(0,0,0,0.3)'
       })
     }, delay)
-  }, [readShadowPixels, getShadowStatus])
+  }, [readShadowPixels, getShadowStatus, buildShadowSchedule])
 
   // ── SunnyUntil ────────────────────────────────────────────────────────────
   const computeSunnyUntil = useCallback((terrace, currentTime) => {
     if (!getShadowStatus(terrace, currentTime)) return null
 
-    let cursor = new Date(currentTime)
+    const schedule = shadowScheduleRef.current[terrace.id]
+
+    const getScheduledStatus = (t, slotTime) => {
+      if (schedule) {
+        const key = slotTime.getHours() * 100 + slotTime.getMinutes()
+        const v = schedule[key]
+        if (v !== undefined) return v
+      }
+      return getShadowStatus(t, slotTime)
+    }
+
+    // Aligne le curseur sur le prochain créneau 30 min
+    const startCursor = new Date(currentTime)
+    const rem = startCursor.getMinutes() % 30
+    if (rem !== 0) startCursor.setMinutes(startCursor.getMinutes() + (30 - rem), 0, 0)
+    else startCursor.setSeconds(0, 0)
+
+    let cursor = new Date(startCursor)
     let lastSunnyTime = new Date(currentTime)
 
     const maxTime = new Date(currentTime)
     maxTime.setHours(22, 0, 0, 0)
 
     while (cursor <= maxTime) {
-      cursor = new Date(cursor.getTime() + 30 * 60 * 1000)
-      const sunny = getShadowStatus(terrace, cursor)
+      const sunny = getScheduledStatus(terrace, cursor)
       if (!sunny) break
       lastSunnyTime = new Date(cursor)
+      cursor = new Date(cursor.getTime() + 30 * 60 * 1000)
     }
 
     const { altitude } = getSunPosition(maxTime, terrace.lat, terrace.lng)
