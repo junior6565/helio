@@ -878,9 +878,9 @@ export default function App() {
         </div>
       </div>
 
-      {/* Bouton "Rechercher dans cette zone" — ancré dans la map */}
+      {/* Bouton "Rechercher dans cette zone" — sous la topbar */}
       <div style={{
-        position: 'absolute', bottom: 14, left: '50%',
+        position: 'absolute', top: 155, left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 1100,
         display: showSearchHere ? 'flex' : 'none',
