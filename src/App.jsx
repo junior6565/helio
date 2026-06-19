@@ -148,6 +148,30 @@ function IconMapPin({ size = 16, color = '#7A5A42' }) {
   )
 }
 
+function IconMap({ size = 18, color = '#D4500A' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+      style={{ flexShrink: 0 }}>
+      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+      <line x1="8" y1="2" x2="8" y2="18" />
+      <line x1="16" y1="6" x2="16" y2="22" />
+    </svg>
+  )
+}
+
+function IconRoute({ size = 18, color = '#D4500A' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+      style={{ flexShrink: 0 }}>
+      <circle cx="6" cy="19" r="3" />
+      <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" />
+      <circle cx="18" cy="5" r="3" />
+    </svg>
+  )
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatTime(date) {
@@ -265,6 +289,7 @@ export default function App() {
   const [selectedTerrace, setSelectedTerrace] = useState(null)
   const [filter, setFilter] = useState({ minRating: 0, type: 'all', onlyOpen: false, onlySunny: false })
   const [filterPanelOpen, setFilterPanelOpen] = useState(false)
+  const [showItineraireModal, setShowItineraireModal] = useState(false)
   const [sunInfo, setSunInfo] = useState(null)
   const [timeSlots, setTimeSlots] = useState([])
   const [mapCenter, setMapCenter] = useState(PARIS)
@@ -1339,12 +1364,14 @@ export default function App() {
 
                 {/* Itinéraire + Partager */}
                 <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                  <button style={{
-                    ...btnBase, flex: 1, background: '#1C0F06', borderRadius: 4,
-                    padding: '14px', color: '#F5E6C8', gap: 8, border: 'none',
-                    fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: 3,
-                    boxShadow: '4px 4px 0px #D4500A',
-                  }}>
+                  <button
+                    onClick={() => setShowItineraireModal(true)}
+                    style={{
+                      ...btnBase, flex: 1, background: '#1C0F06', borderRadius: 4,
+                      padding: '14px', color: '#F5E6C8', gap: 8, border: 'none',
+                      fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: 3,
+                      boxShadow: '4px 4px 0px #D4500A',
+                    }}>
                     <IconNavigation size={15} color="#F5E6C8" />
                     Itinéraire
                   </button>
@@ -1360,6 +1387,86 @@ export default function App() {
           </>
         )}
       </div>
+
+      {/* Modal Itinéraire */}
+      {showItineraireModal && selectedTerrace && (() => {
+        const lat = selectedTerrace.lat
+        const lng = selectedTerrace.lng
+        const nom = encodeURIComponent(selectedTerrace.name)
+        const options = [
+          {
+            icon: <IconMap size={18} color="#D4500A" />,
+            label: 'APPLE PLANS',
+            url: `maps://maps.apple.com/?daddr=${lat},${lng}&q=${nom}`,
+          },
+          {
+            icon: <IconMapPin size={18} color="#D4500A" />,
+            label: 'GOOGLE MAPS',
+            url: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+          },
+          {
+            icon: <IconRoute size={18} color="#D4500A" />,
+            label: 'CITYMAPPER',
+            url: `https://citymapper.com/directions?endcoord=${lat},${lng}&endname=${nom}`,
+          },
+        ]
+        return (
+          <>
+            <div
+              onClick={() => setShowItineraireModal(false)}
+              style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1300 }}
+            />
+            <div style={{
+              position: 'absolute', bottom: 0, left: '50%',
+              transform: 'translateX(-50%)',
+              width: '100%', maxWidth: 400,
+              zIndex: 1301,
+              padding: '0 12px 24px',
+            }}>
+              <div style={{
+                background: '#1C0F06', border: '1.5px solid #3D1F0A',
+                borderRadius: 4, boxShadow: '4px 4px 0px #D4500A',
+                overflow: 'hidden',
+              }}>
+                {options.map((opt, i) => (
+                  <button
+                    key={opt.label}
+                    onClick={() => { window.open(opt.url, '_blank'); setShowItineraireModal(false) }}
+                    style={{
+                      ...btnBase, width: '100%', padding: '16px 20px', gap: 14,
+                      justifyContent: 'flex-start',
+                      background: 'transparent',
+                      borderBottom: i < options.length - 1 ? '1px solid #241208' : 'none',
+                      border: 'none',
+                      borderBottom: i < options.length - 1 ? '1px solid #241208' : 'none',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#241208' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                  >
+                    {opt.icon}
+                    <span style={{
+                      fontFamily: "'Bebas Neue', sans-serif",
+                      fontSize: 16, letterSpacing: 2, color: '#F5E6C8',
+                    }}>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setShowItineraireModal(false)}
+                style={{
+                  ...btnBase, width: '100%', marginTop: 8,
+                  background: '#1C0F06', border: '1.5px solid #3D1F0A',
+                  borderRadius: 4, padding: '14px',
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: 16, letterSpacing: 2, color: '#7A5A42',
+                }}
+              >
+                Annuler
+              </button>
+            </div>
+          </>
+        )
+      })()}
 
       {/* Panel Planifier */}
       {showPlanifier && (
