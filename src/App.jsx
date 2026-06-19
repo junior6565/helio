@@ -1540,11 +1540,41 @@ export default function App() {
 
               {/* Voir les terrasses */}
               <button
-                onClick={() => {
+                onClick={async () => {
                   const [debutH, debutM] = planifDebut.split(':').map(Number)
                   const [finH, finM] = planifFin.split(':').map(Number)
                   const debutTotal = debutH * 60 + debutM
                   const finTotal = finH * 60 + finM
+
+                  setShowPlanifier(false)
+
+                  // Résoudre les coords de la zone cible et charger les terrasses
+                  let terracesToFilter = terracesRef.current
+                  if (planifQuartier && map.current) {
+                    let targetCoords = null
+                    if (planifQuartier === 'Autour de moi') {
+                      const c = map.current.getCenter()
+                      targetCoords = [c.lat, c.lng]
+                    } else {
+                      targetCoords = QUARTIERS[planifQuartier] || null
+                      if (!targetCoords) {
+                        try {
+                          const res = await fetch(
+                            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(planifQuartier + ', Paris, France')}&format=json&limit=1`
+                          )
+                          const geo = await res.json()
+                          if (geo[0]) targetCoords = [parseFloat(geo[0].lat), parseFloat(geo[0].lon)]
+                        } catch (_) {}
+                      }
+                    }
+                    if (targetCoords) {
+                      flyingRef.current = true
+                      map.current.flyTo(targetCoords, 16, { duration: 0.8 })
+                      map.current.once('moveend', () => { flyingRef.current = false })
+                      const fresh = await loadTerraces(targetCoords[0], targetCoords[1], 800)
+                      if (fresh?.length) terracesToFilter = fresh
+                    }
+                  }
 
                   const slots = []
                   for (let m = debutTotal; m <= finTotal; m += 30) {
@@ -1554,6 +1584,9 @@ export default function App() {
                   }
 
                   const isSunnyAtSlot = (terrace, date) => {
+                    const key = date.getHours() * 100 + date.getMinutes()
+                    const sched = shadowScheduleRef.current[terrace.id]
+                    if (sched && sched[key] !== undefined) return sched[key]
                     const { altitude } = getSunPosition(date, terrace.lat, terrace.lng)
                     return altitude > 8
                   }
@@ -1562,11 +1595,14 @@ export default function App() {
                     'Café': ['cafe', 'coffee_shop'],
                     'Restaurant': ['restaurant'],
                   }
-                  const resultats = terracesRef.current.filter(terrace => {
+                  const resultats = terracesToFilter.filter(terrace => {
                     if (!terrace.lat || !terrace.lng) return false
                     if (planifType !== 'Tous') {
                       const types = typeMap[planifType] || []
-                      if (!terrace.types?.some(t => types.includes(t))) return false
+                      const typeMatch =
+                        types.some(t2 => terrace.type?.toLowerCase().includes(t2)) ||
+                        terrace.types?.some(type => types.some(t2 => type.toLowerCase().includes(t2)))
+                      if (!typeMatch) return false
                     }
                     return slots.every(slot => {
                       const sunny = isSunnyAtSlot(terrace, slot)
@@ -1581,21 +1617,6 @@ export default function App() {
 
                   setPlanifResultats(resultats)
                   setPlanifActif(true)
-
-                  if (planifQuartier && map.current) {
-                    if (planifQuartier === 'Autour de moi') {
-                      const center = map.current.getCenter()
-                      map.current.flyTo([center.lat, center.lng], 16, { duration: 0 })
-                    } else {
-                      const coords = QUARTIERS[planifQuartier]
-                      if (coords) {
-                        flyingRef.current = true
-                        map.current.flyTo(coords, 16, { duration: 0.8 })
-                        map.current.once('moveend', () => { flyingRef.current = false })
-                      }
-                    }
-                  }
-                  setShowPlanifier(false)
                 }}
                 style={{
                   ...btnBase, background: '#D4500A', color: '#F5E6C8',
@@ -1632,6 +1653,7 @@ export default function App() {
                 setPlanifActif(false)
                 setPlanifResultats([])
                 setPlanifType('Tous')
+                setSelectedTerrace(null)
                 setTime(new Date())
               }}
               style={{ ...btnBase, background: '#241208', border: '1.5px solid #3D1F0A', borderRadius: 4, width: 24, height: 24 }}
