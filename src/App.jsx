@@ -169,7 +169,7 @@ function getSunnyUntil(time, lat, lng) {
 }
 
 function markerColor(sunny) {
-  return sunny ? '#D4500A' : '#A89060'
+  return sunny ? '#D4500A' : '#6B7280'
 }
 
 function SunStatusIcon({ score, size = 22 }) {
@@ -327,8 +327,8 @@ export default function App() {
     L.Icon.Default.mergeOptions({ iconUrl: '', shadowUrl: '' })
 
     map.current = L.map(mapContainer.current, {
-      center: [PARIS.lat, PARIS.lng],
-      zoom: 16,
+      center: [48.8534, 2.3488],
+      zoom: 17,
       zoomControl: false,
     })
 
@@ -348,9 +348,15 @@ export default function App() {
       })
     }
 
-    const osmbStyle = document.createElement('style')
-    osmbStyle.textContent = '.osmb { filter: saturate(0) brightness(1.1); }'
-    document.head.appendChild(osmbStyle)
+    const fixOSMColors = () => {
+      const canvases = mapContainer.current?.querySelectorAll('canvas')
+      canvases?.forEach(canvas => {
+        canvas.style.filter = 'saturate(0.15) brightness(1.05)'
+      })
+    }
+    setTimeout(fixOSMColors, 1000)
+    map.current.on('moveend', fixOSMColors)
+    map.current.on('zoomend', fixOSMColors)
 
     shadowRendererRef.current = {
       update: (date) => osmbRef.current.date(date),
@@ -434,7 +440,7 @@ export default function App() {
         dot.style.background = markerColor(sunny)
         dot.style.boxShadow = sunny
           ? '0 0 0 3px rgba(212,80,10,0.2), 3px 3px 0px rgba(139,58,7,0.4)'
-          : '0 1px 4px rgba(0,0,0,0.15)'
+          : '0 2px 6px rgba(0,0,0,0.3)'
       })
     }
 
@@ -571,7 +577,7 @@ export default function App() {
         dot.style.background = markerColor(sunny)
         dot.style.boxShadow = sunny
           ? '0 0 0 3px rgba(212,80,10,0.2), 3px 3px 0px rgba(139,58,7,0.4)'
-          : '0 1px 4px rgba(0,0,0,0.15)'
+          : '0 2px 6px rgba(0,0,0,0.3)'
       })
     }, delay)
   }, [readShadowPixels, getShadowStatus])
@@ -616,21 +622,21 @@ export default function App() {
       const isUnconfirmed = terrace.hasOutdoorSeating === null
       const dotBorder = isUnconfirmed
         ? '2.5px dashed #F5E6C8'
-        : (sunny ? '3px solid #F5E6C8' : '2.5px solid #F5EFE0')
+        : (sunny ? '3px solid #F5E6C8' : '3px solid white')
       const dotOpacity = isUnconfirmed ? '0.75' : '1'
-      const sz = isMobile ? '28px' : '20px'
+      const sz = '22px'
       const shadowVal = sunny
         ? '0 0 0 3px rgba(212,80,10,0.2), 3px 3px 0px rgba(139,58,7,0.4)'
-        : '0 1px 4px rgba(0,0,0,0.15)'
+        : '0 2px 6px rgba(0,0,0,0.3)'
 
       const icon = L.divIcon({
         className: '',
-        html: `<div style="position:relative;width:36px;height:36px;">
-          <div class="mk-ring" style="position:absolute;top:50%;left:50%;width:36px;height:36px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid transparent;opacity:0;transition:all 0.2s ease;pointer-events:none;box-sizing:border-box;"></div>
+        html: `<div style="position:relative;width:28px;height:28px;">
+          <div class="mk-ring" style="position:absolute;top:50%;left:50%;width:28px;height:28px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid transparent;opacity:0;transition:all 0.2s ease;pointer-events:none;box-sizing:border-box;"></div>
           <div class="mk-dot" style="position:absolute;top:50%;left:50%;width:${sz};height:${sz};border-radius:50%;transform:translate(-50%,-50%);border:${dotBorder};cursor:pointer;background:${color};box-shadow:${shadowVal};opacity:${dotOpacity};transition:width 0.2s ease,height 0.2s ease,background 0.2s ease,box-shadow 0.2s ease;box-sizing:border-box;"></div>
         </div>`,
-        iconSize: [36, 36],
-        iconAnchor: [18, 18],
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
       })
 
       const marker = L.marker([terrace.lat, terrace.lng], { icon })
@@ -681,8 +687,8 @@ export default function App() {
       const color = markerColor(getShadowStatus(t, time))
       ring.style.borderColor = isSelected ? color : 'transparent'
       ring.style.opacity = isSelected ? '1' : '0'
-      dot.style.width = isSelected ? '25px' : '20px'
-      dot.style.height = isSelected ? '25px' : '20px'
+      dot.style.width = isSelected ? '27px' : '22px'
+      dot.style.height = isSelected ? '27px' : '22px'
     })
   }, [selectedTerrace, time])
 
@@ -727,8 +733,8 @@ export default function App() {
 
       {/* Search bar + quick filter pills */}
       <div style={{
-        position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
-        width: 'calc(100vw - 24px)', maxWidth: 540, zIndex: 1100,
+        position: 'absolute', top: 0, left: 0, right: 0,
+        zIndex: 1100, width: '100%',
       }}>
         <div style={{ ...panel, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
@@ -772,8 +778,8 @@ export default function App() {
                 onClick={() => setFilterPanelOpen(true)}
                 style={{
                   ...btnBase, background: 'transparent', border: '1.5px solid #5C2E12',
-                  borderRadius: 4, padding: isMobile ? '8px 10px' : '8px 10px', gap: 4, flexShrink: 0,
-                  color: '#C4A882', fontFamily: "'Bebas Neue', sans-serif", fontSize: 14, letterSpacing: 2,
+                  borderRadius: 4, padding: '5px 8px', gap: 4, flexShrink: 0,
+                  color: '#C4A882', fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1,
                 }}
               >
                 <IconSliders size={13} color="#C4A882" />
@@ -783,8 +789,8 @@ export default function App() {
                 onClick={() => setShowPlanifier(v => !v)}
                 style={{
                   ...btnBase, background: '#D4500A', border: 'none',
-                  borderRadius: 4, padding: isMobile ? '8px 10px' : '8px 12px', gap: 4, flexShrink: 0,
-                  color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", fontSize: 14, letterSpacing: 2,
+                  borderRadius: 4, padding: '5px 8px', gap: 4, flexShrink: 0,
+                  color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1,
                   boxShadow: '2px 2px 0px #8B3A07',
                 }}
               >
@@ -841,7 +847,6 @@ export default function App() {
               { label: '4+ étoiles', active: filter.minRating >= 4, onClick: () => setFilter(f => ({ ...f, minRating: f.minRating >= 4 ? 0 : 4 })), icon: <IconStar size={10} color={filter.minRating >= 4 ? '#F5E6C8' : '#D4500A'} /> },
               { label: 'Bar', active: filter.type === 'bar', onClick: () => setFilter(f => ({ ...f, type: f.type === 'bar' ? 'all' : 'bar' })) },
               { label: 'Café', active: filter.type === 'café', onClick: () => setFilter(f => ({ ...f, type: f.type === 'café' ? 'all' : 'café' })) },
-              { key: 'sunny', label: 'Au soleil', active: filter.onlySunny, onClick: () => setFilter(f => ({ ...f, onlySunny: !f.onlySunny })), icon: <SunStatusIcon score={sunInfo?.score ?? 70} size={12} /> },
             ].map(({ key, label, active, onClick, icon }) => (
               <button key={key ?? label} onClick={onClick} style={{
                 ...btnBase, gap: 4,
@@ -855,6 +860,22 @@ export default function App() {
                 {icon}{label}
               </button>
             ))}
+            {/* Pill Au soleil — toujours distincte */}
+            <button
+              onClick={() => setFilter(f => ({ ...f, onlySunny: !f.onlySunny }))}
+              style={{
+                ...btnBase, gap: 4,
+                background: filter.onlySunny ? '#D4500A' : 'rgba(212,80,10,0.12)',
+                border: filter.onlySunny ? '1.5px solid #D4500A' : '1.5px solid rgba(212,80,10,0.4)',
+                borderRadius: 4, padding: '4px 10px', whiteSpace: 'nowrap',
+                color: filter.onlySunny ? '#F5E6C8' : '#C4703A',
+                fontSize: 10, fontWeight: filter.onlySunny ? 600 : 400,
+                textTransform: 'uppercase', letterSpacing: '1px',
+              }}
+            >
+              <SunStatusIcon score={sunInfo?.score ?? 70} size={12} />
+              Au soleil
+            </button>
           </div>
 
           {/* Bandeau mode planifier actif */}
@@ -893,9 +914,9 @@ export default function App() {
           }}
           style={{
             background: '#1C0F06', border: '2px solid #D4500A', borderRadius: 4,
-            padding: '7px 18px', fontSize: 13,
-            color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 2,
-            cursor: 'pointer', boxShadow: '3px 3px 0px #D4500A',
+            padding: '5px 12px', fontSize: 10,
+            color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 1,
+            cursor: 'pointer', boxShadow: '2px 2px 0px #D4500A',
             display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
           }}
         >
@@ -910,25 +931,25 @@ export default function App() {
           border: '1.5px solid #3D1F0A',
           borderRadius: 4,
           boxShadow: '3px 3px 0px #D4500A',
-          position: 'absolute', top: isMobile ? 185 : 114, left: 12, zIndex: 1100,
+          position: 'absolute', top: 145, left: 12, zIndex: 1100,
           padding: isMobile ? '6px 10px' : '10px 14px',
           minWidth: isMobile ? 'auto' : 170,
         }}>
           {isMobile ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <SunStatusIcon score={sunInfo.score} size={16} />
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, color: '#F4A460', letterSpacing: 2 }}>{sunInfo.label}</div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: '#F4A460', letterSpacing: 2 }}>{sunInfo.label}</div>
             </div>
           ) : (
             <>
-              <div style={{ fontSize: 9, color: '#7A5A42', marginBottom: 6, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 1 }}>Soleil maintenant</div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 9, color: '#7A5A42', marginBottom: 6, letterSpacing: 2, textTransform: 'uppercase' }}>Soleil maintenant</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
                 <SunStatusIcon score={sunInfo.score} />
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, color: '#F4A460', letterSpacing: 2 }}>{sunInfo.label}</div>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: '#F4A460', letterSpacing: 2 }}>{sunInfo.label}</div>
               </div>
-              <div style={{ display: 'flex', gap: 10, fontSize: 9, color: '#5C3A22', borderTop: '1px solid #3D1F0A', paddingTop: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
-                <span>Lever {formatTime(sunInfo.sunrise)}</span>
-                <span>Coucher {formatTime(sunInfo.sunset)}</span>
+              <div style={{ display: 'flex', gap: 10, borderTop: '1px solid #3D1F0A', paddingTop: 8 }}>
+                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 10, color: '#C4A882', letterSpacing: 1 }}>Lever {formatTime(sunInfo.sunrise)}</span>
+                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 10, color: '#C4A882', letterSpacing: 1 }}>Coucher {formatTime(sunInfo.sunset)}</span>
               </div>
             </>
           )}
@@ -1043,9 +1064,10 @@ export default function App() {
       {/* Floating time slider */}
       <div style={{
         ...panel,
-        position: 'absolute', bottom: isMobile ? 'calc(20px + env(safe-area-inset-bottom))' : 20, left: '50%', transform: 'translateX(-50%)',
-        padding: '13px 18px', zIndex: 1100,
-        maxWidth: 480, width: 'calc(100vw - 24px)',
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        zIndex: 1100, width: '100%',
+        borderRadius: '16px 16px 0 0',
+        padding: '12px 16px 20px',
         opacity: (selectedTerrace || planifActif) ? 0 : 1,
         pointerEvents: (selectedTerrace || planifActif) ? 'none' : 'auto',
         transition: 'opacity 0.25s ease',
@@ -1652,19 +1674,19 @@ export default function App() {
           bottom: isMobile ? 120 : 100,
           right: 12,
           zIndex: 1100,
-          width: 36,
-          height: 36,
+          width: 44,
+          height: 44,
           borderRadius: 4,
           background: '#1C0F06',
           border: '1.5px solid #3D1F0A',
-          boxShadow: '2px 2px 0px #D4500A',
+          boxShadow: '2px 2px 0px #D4500A, 0 0 8px rgba(212,80,10,0.2)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
         }}
       >
-        <IconNavigation size={16} color="#F4A460" />
+        <IconNavigation size={18} color="#F4A460" />
       </button>
 
     </div>
