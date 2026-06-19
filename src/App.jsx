@@ -746,7 +746,7 @@ export default function App() {
         position: 'absolute', top: 0, left: 0, right: 0,
         zIndex: 1100, width: '100%',
       }}>
-        <div style={{ ...panel, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ ...panel, display: 'flex', flexDirection: 'column' }}>
 
           {isMobile ? (
             /* ── Mobile : empilé (topbar + searchbar + pills) ── */
@@ -783,7 +783,7 @@ export default function App() {
                   </button>
                 </div>
                 {searchFocused && searchResults.length > 0 && (
-                  <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: '#241208', borderRadius: 4, border: '1.5px solid #3D1F0A', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', overflow: 'hidden', zIndex: 1150 }}>
+                  <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#241208', borderRadius: 4, border: '1.5px solid #3D1F0A', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', overflow: 'hidden', zIndex: 1200 }}>
                     {searchResults.map((place, i) => (
                       <button key={place.id || i} onMouseDown={() => handleSuggestionClick(place)}
                         style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', padding: '10px 14px', background: 'transparent', border: 'none', borderTop: i > 0 ? '1px solid #3D1F0A' : 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
@@ -809,7 +809,7 @@ export default function App() {
           ) : (
             /* ── Desktop : ligne unique 44px ── */
             <>
-              <div className="topbar" style={{ background: '#D4500A', padding: '6px 20px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, position: 'relative', overflow: 'hidden' }}>
+              <div className="topbar" style={{ background: '#D4500A', padding: '6px 20px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, position: 'relative' }}>
                 {/* Logo gauche */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                   <div style={{ position: 'relative', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -831,7 +831,7 @@ export default function App() {
                     {loading && <span style={{ color: '#D4500A', fontSize: 11, fontWeight: 500, flexShrink: 0 }}>…</span>}
                   </div>
                   {searchFocused && searchResults.length > 0 && (
-                    <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: '#241208', borderRadius: 4, border: '1.5px solid #3D1F0A', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', overflow: 'hidden', zIndex: 1150 }}>
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#241208', borderRadius: 4, border: '1.5px solid #3D1F0A', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', overflow: 'hidden', zIndex: 1200 }}>
                       {searchResults.map((place, i) => (
                         <button key={place.id || i} onMouseDown={() => handleSuggestionClick(place)}
                           style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', padding: '10px 14px', background: 'transparent', border: 'none', borderTop: i > 0 ? '1px solid #3D1F0A' : 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
@@ -1651,7 +1651,7 @@ export default function App() {
         </>
       )}
 
-      {/* Bouton géolocalisation */}
+      {/* Bouton géolocalisation — haut droite sous la topbar */}
       <button
         onClick={() => {
           if (!navigator.geolocation) return
@@ -1665,11 +1665,11 @@ export default function App() {
         }}
         style={{
           position: 'absolute',
-          bottom: isMobile ? 'calc(100px + env(safe-area-inset-bottom))' : 80,
+          top: isMobile ? 160 : 110,
           right: 12,
           zIndex: 1100,
-          width: 44,
-          height: 44,
+          width: 36,
+          height: 36,
           borderRadius: 4,
           background: '#1C0F06',
           border: '1.5px solid #3D1F0A',
@@ -1680,7 +1680,7 @@ export default function App() {
           cursor: 'pointer',
         }}
       >
-        <IconNavigation size={18} color="#F4A460" />
+        <IconNavigation size={16} color="#F4A460" />
       </button>
 
     </div>
