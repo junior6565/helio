@@ -154,19 +154,6 @@ function formatTime(date) {
   return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 
-function getSunnyUntil(time, lat, lng) {
-  const check = new Date(time)
-  for (let i = 0; i < 96; i++) {
-    check.setMinutes(check.getMinutes() + 15)
-    const { altitude } = getSunPosition(check, lat, lng)
-    if (altitude <= 8) {
-      const shadowTime = new Date(check.getTime() - 15 * 60000)
-      const soon = shadowTime.getTime() - time.getTime() < 30 * 60000
-      return { time: shadowTime, soon }
-    }
-  }
-  return null
-}
 
 function markerColor(sunny) {
   return sunny ? '#D4500A' : '#6B7280'
@@ -288,6 +275,7 @@ export default function App() {
   const [sheetExpanded, setSheetExpanded] = useState(false)
   const [showIntro, setShowIntro] = useState(() => !localStorage.getItem('helio_intro_seen'))
   const [shadowVersion, setShadowVersion] = useState(0)
+  const [sunnyUntil, setSunnyUntil] = useState(null)
   const [showPlanifier, setShowPlanifier] = useState(false)
   const [showSearchHere, setShowSearchHere] = useState(false)
   const [planifQuartier, setPlanifQuartier] = useState('')
@@ -572,6 +560,34 @@ export default function App() {
     }, delay)
   }, [readShadowPixels, getShadowStatus])
 
+  // ── SunnyUntil ────────────────────────────────────────────────────────────
+  const computeSunnyUntil = useCallback((terrace, currentTime) => {
+    if (!getShadowStatus(terrace, currentTime)) return null
+
+    let cursor = new Date(currentTime)
+    let lastSunnyTime = new Date(currentTime)
+
+    const maxTime = new Date(currentTime)
+    maxTime.setHours(22, 0, 0, 0)
+
+    while (cursor <= maxTime) {
+      cursor = new Date(cursor.getTime() + 30 * 60 * 1000)
+      const sunny = getShadowStatus(terrace, cursor)
+      if (!sunny) break
+      lastSunnyTime = new Date(cursor)
+    }
+
+    const { altitude } = getSunPosition(maxTime, terrace.lat, terrace.lng)
+    if (lastSunnyTime >= maxTime && altitude > 5) return 'coucher'
+
+    return lastSunnyTime
+  }, [getShadowStatus])
+
+  useEffect(() => {
+    if (!selectedTerrace) { setSunnyUntil(null); return }
+    setSunnyUntil(computeSunnyUntil(selectedTerrace, time))
+  }, [selectedTerrace, time, shadowVersion, computeSunnyUntil])
+
   // ── Markers ───────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!mapReady || !map.current) return
@@ -714,9 +730,6 @@ export default function App() {
   ]
 
   const selectedSunny = selectedTerrace ? getShadowStatus(selectedTerrace, time) : false
-  const sunnyUntil = (selectedTerrace && selectedSunny)
-    ? getSunnyUntil(time, selectedTerrace.lat, selectedTerrace.lng)
-    : null
   const photoUrl = selectedTerrace?.photoRef
     ? `https://places.googleapis.com/v1/${selectedTerrace.photoRef}/media?maxHeightPx=300&maxWidthPx=600&key=${GOOGLE_PLACES_KEY}`
     : null
@@ -1133,10 +1146,11 @@ export default function App() {
                     : <IconCloud size={16} color="#A89060" />
                   }
                   <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 15, color: selectedSunny ? '#F4A460' : '#C4A882', letterSpacing: 1 }}>
-                    {selectedSunny
-                      ? (sunnyUntil ? (sunnyUntil.soon ? "À l'ombre bientôt" : `Ensoleillé jusqu'à ${formatTime(sunnyUntil.time)}`) : 'Ensoleillé toute la soirée')
-                      : "À l'ombre actuellement"
-                    }
+                    {sunnyUntil === null && "À l'ombre actuellement"}
+                    {sunnyUntil === 'coucher' && "Ensoleillé jusqu'au coucher"}
+                    {sunnyUntil instanceof Date && (
+                      `Ensoleillé jusqu'à ${sunnyUntil.getHours().toString().padStart(2, '0')}h${sunnyUntil.getMinutes().toString().padStart(2, '0')}`
+                    )}
                   </span>
                 </div>
               </div>
