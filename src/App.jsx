@@ -348,16 +348,6 @@ export default function App() {
       })
     }
 
-    const fixOSMColors = () => {
-      const canvases = mapContainer.current?.querySelectorAll('canvas')
-      canvases?.forEach(canvas => {
-        canvas.style.filter = 'saturate(0.15) brightness(1.05)'
-      })
-    }
-    setTimeout(fixOSMColors, 1000)
-    map.current.on('moveend', fixOSMColors)
-    map.current.on('zoomend', fixOSMColors)
-
     shadowRendererRef.current = {
       update: (date) => osmbRef.current.date(date),
       destroy: () => {},
@@ -716,6 +706,13 @@ export default function App() {
     setTime(d)
   }
 
+  const pillsConfig = [
+    { label: 'Ouvert', active: filter.onlyOpen, onClick: () => setFilter(f => ({ ...f, onlyOpen: !f.onlyOpen })) },
+    { label: '4+ étoiles', active: filter.minRating >= 4, onClick: () => setFilter(f => ({ ...f, minRating: f.minRating >= 4 ? 0 : 4 })), icon: <IconStar size={10} color={filter.minRating >= 4 ? '#F5E6C8' : '#D4500A'} /> },
+    { label: 'Bar', active: filter.type === 'bar', onClick: () => setFilter(f => ({ ...f, type: f.type === 'bar' ? 'all' : 'bar' })) },
+    { label: 'Café', active: filter.type === 'café', onClick: () => setFilter(f => ({ ...f, type: f.type === 'café' ? 'all' : 'café' })) },
+  ]
+
   const selectedSunny = selectedTerrace ? getShadowStatus(selectedTerrace, time) : false
   const sunnyUntil = (selectedTerrace && selectedSunny)
     ? getSunnyUntil(time, selectedTerrace.lat, selectedTerrace.lng)
@@ -738,145 +735,123 @@ export default function App() {
       }}>
         <div style={{ ...panel, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-          {/* TOPBAR */}
-          <div className="topbar" style={{
-            background: '#D4500A',
-            padding: '8px 16px',
-            display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-            gap: 8, position: 'relative', overflow: 'hidden',
-          }}>
-            <div style={{ position: 'relative', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <div style={{ position: 'absolute', width: 26, height: 26, borderRadius: '50%', border: '2px solid #F5E6C8' }} />
-              <div style={{ position: 'absolute', width: 17, height: 17, borderRadius: '50%', border: '1.5px solid #F5E6C8', opacity: 0.85 }} />
-              <div style={{ position: 'absolute', width: 7, height: 7, borderRadius: '50%', background: '#F5E6C8', boxShadow: '0 0 6px rgba(245,230,200,0.6)' }} />
-            </div>
-            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 24, color: '#F5E6C8', letterSpacing: 4, lineHeight: 1, textShadow: '2px 2px 0px rgba(0,0,0,0.2)' }}>
-              HELIO
-            </span>
-          </div>
-
-          {/* SEARCHBAR */}
-          <div style={{ background: '#241208', borderBottom: '2px solid #3D1F0A', padding: '10px 14px', position: 'relative' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, background: '#1C0F06', borderRadius: 4, padding: '7px 12px', border: '1.5px solid #3D1F0A', minWidth: 0 }}>
-                <IconSearch size={14} color="#7A5A42" />
-                <input
-                  type="text"
-                  placeholder={isMobile ? 'Rechercher...' : 'Rechercher un lieu ou une terrasse...'}
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
-                  style={{
-                    flex: 1, border: 'none', outline: 'none', background: 'transparent',
-                    color: '#C4A882', fontSize: 12, fontFamily: "'Space Grotesk', sans-serif", minWidth: 0,
-                  }}
-                />
-                {loading && <span style={{ color: '#D4500A', fontSize: 11, fontWeight: 500, flexShrink: 0 }}>…</span>}
-              </div>
-              <button
-                onClick={() => setFilterPanelOpen(true)}
-                style={{
-                  ...btnBase, background: 'transparent', border: '1.5px solid #5C2E12',
-                  borderRadius: 4, padding: '5px 8px', gap: 4, flexShrink: 0,
-                  color: '#C4A882', fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1,
-                }}
-              >
-                <IconSliders size={13} color="#C4A882" />
-                {!isMobile && 'FILTRES'}
-              </button>
-              <button
-                onClick={() => setShowPlanifier(v => !v)}
-                style={{
-                  ...btnBase, background: '#D4500A', border: 'none',
-                  borderRadius: 4, padding: '5px 8px', gap: 4, flexShrink: 0,
-                  color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1,
-                  boxShadow: '2px 2px 0px #8B3A07',
-                }}
-              >
-                <IconClock size={13} color="#F5E6C8" />
-                {!isMobile && 'PLANIFIER'}
-              </button>
-            </div>
-
-            {/* Autocomplete dropdown */}
-            {searchFocused && searchResults.length > 0 && (
-              <div style={{
-                position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
-                background: '#241208', borderRadius: 4,
-                border: '1.5px solid #3D1F0A', boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-                overflow: 'hidden', zIndex: 1150,
+          {isMobile ? (
+            /* ── Mobile : empilé (topbar + searchbar + pills) ── */
+            <>
+              <div className="topbar" style={{
+                background: '#D4500A', padding: '8px 16px',
+                display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                gap: 8, position: 'relative', overflow: 'hidden',
               }}>
-                {searchResults.map((place, i) => (
-                  <button
-                    key={place.id || i}
-                    onMouseDown={() => handleSuggestionClick(place)}
-                    style={{
-                      display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
-                      width: '100%', padding: '10px 14px',
-                      background: 'transparent', border: 'none',
-                      borderTop: i > 0 ? '1px solid #3D1F0A' : 'none',
-                      cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = '#1C0F06' }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-                  >
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#C4A882' }}>
-                      {place.displayName?.text}
-                    </span>
-                    {place.formattedAddress && (
-                      <span style={{ fontSize: 11, color: '#7A5A42', marginTop: 2 }}>
-                        {place.formattedAddress}
-                      </span>
-                    )}
+                <div style={{ position: 'relative', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <div style={{ position: 'absolute', width: 26, height: 26, borderRadius: '50%', border: '2px solid #F5E6C8' }} />
+                  <div style={{ position: 'absolute', width: 17, height: 17, borderRadius: '50%', border: '1.5px solid #F5E6C8', opacity: 0.85 }} />
+                  <div style={{ position: 'absolute', width: 7, height: 7, borderRadius: '50%', background: '#F5E6C8', boxShadow: '0 0 6px rgba(245,230,200,0.6)' }} />
+                </div>
+                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 24, color: '#F5E6C8', letterSpacing: 4, lineHeight: 1, textShadow: '2px 2px 0px rgba(0,0,0,0.2)' }}>HELIO</span>
+              </div>
+
+              <div style={{ background: '#241208', borderBottom: '2px solid #3D1F0A', padding: '8px 12px', position: 'relative' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, background: '#1C0F06', borderRadius: 4, padding: '6px 10px', border: '1.5px solid #3D1F0A', minWidth: 0 }}>
+                    <IconSearch size={13} color="#7A5A42" />
+                    <input type="text" placeholder="Rechercher..." value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      onFocus={() => setSearchFocused(true)}
+                      onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+                      style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', color: '#C4A882', fontSize: 12, fontFamily: "'Space Grotesk', sans-serif", minWidth: 0 }} />
+                    {loading && <span style={{ color: '#D4500A', fontSize: 11, fontWeight: 500, flexShrink: 0 }}>…</span>}
+                  </div>
+                  <button onClick={() => setFilterPanelOpen(true)} style={{ ...btnBase, background: 'transparent', border: '1.5px solid #5C2E12', borderRadius: 4, padding: '5px 8px', gap: 4, flexShrink: 0, color: '#C4A882', fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1 }}>
+                    <IconSliders size={13} color="#C4A882" />
                   </button>
-                ))}
+                  <button onClick={() => setShowPlanifier(v => !v)} style={{ ...btnBase, background: '#D4500A', border: 'none', borderRadius: 4, padding: '5px 8px', gap: 4, flexShrink: 0, color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1, boxShadow: '2px 2px 0px #8B3A07' }}>
+                    <IconClock size={13} color="#F5E6C8" />
+                  </button>
+                </div>
+                {searchFocused && searchResults.length > 0 && (
+                  <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: '#241208', borderRadius: 4, border: '1.5px solid #3D1F0A', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', overflow: 'hidden', zIndex: 1150 }}>
+                    {searchResults.map((place, i) => (
+                      <button key={place.id || i} onMouseDown={() => handleSuggestionClick(place)}
+                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', padding: '10px 14px', background: 'transparent', border: 'none', borderTop: i > 0 ? '1px solid #3D1F0A' : 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#1C0F06' }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: '#C4A882' }}>{place.displayName?.text}</span>
+                        {place.formattedAddress && <span style={{ fontSize: 11, color: '#7A5A42', marginTop: 2 }}>{place.formattedAddress}</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* PILLS */}
-          <div className="pills-scroll" style={{
-            background: '#1C0F06', borderBottom: '2px solid #3D1F0A',
-            padding: '6px 12px 8px',
-            display: 'flex', flexWrap: 'nowrap', gap: 6, overflowX: 'auto',
-            scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
-          }}>
-            {[
-              { label: 'Ouvert', active: filter.onlyOpen, onClick: () => setFilter(f => ({ ...f, onlyOpen: !f.onlyOpen })) },
-              { label: '4+ étoiles', active: filter.minRating >= 4, onClick: () => setFilter(f => ({ ...f, minRating: f.minRating >= 4 ? 0 : 4 })), icon: <IconStar size={10} color={filter.minRating >= 4 ? '#F5E6C8' : '#D4500A'} /> },
-              { label: 'Bar', active: filter.type === 'bar', onClick: () => setFilter(f => ({ ...f, type: f.type === 'bar' ? 'all' : 'bar' })) },
-              { label: 'Café', active: filter.type === 'café', onClick: () => setFilter(f => ({ ...f, type: f.type === 'café' ? 'all' : 'café' })) },
-            ].map(({ key, label, active, onClick, icon }) => (
-              <button key={key ?? label} onClick={onClick} style={{
-                ...btnBase, gap: 4,
-                background: active ? '#D4500A' : 'transparent',
-                border: active ? '1.5px solid #D4500A' : '1.5px solid #3D1F0A',
-                borderRadius: 4, padding: '4px 10px', whiteSpace: 'nowrap',
-                color: active ? '#F5E6C8' : '#7A5A42',
-                fontSize: 10, fontWeight: active ? 600 : 400,
-                textTransform: 'uppercase', letterSpacing: '1px',
-              }}>
-                {icon}{label}
-              </button>
-            ))}
-            {/* Pill Au soleil — toujours distincte */}
-            <button
-              onClick={() => setFilter(f => ({ ...f, onlySunny: !f.onlySunny }))}
-              style={{
-                ...btnBase, gap: 4,
-                background: filter.onlySunny ? '#D4500A' : 'rgba(212,80,10,0.12)',
-                border: filter.onlySunny ? '1.5px solid #D4500A' : '1.5px solid rgba(212,80,10,0.4)',
-                borderRadius: 4, padding: '4px 10px', whiteSpace: 'nowrap',
-                color: filter.onlySunny ? '#F5E6C8' : '#C4703A',
-                fontSize: 10, fontWeight: filter.onlySunny ? 600 : 400,
-                textTransform: 'uppercase', letterSpacing: '1px',
-              }}
-            >
-              <SunStatusIcon score={sunInfo?.score ?? 70} size={12} />
-              Au soleil
-            </button>
-          </div>
+              <div className="pills-scroll" style={{ background: '#1C0F06', borderBottom: '2px solid #3D1F0A', padding: '5px 12px 7px', display: 'flex', flexWrap: 'nowrap', gap: 6, overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+                {pillsConfig.map(({ key, label, active, onClick, icon }) => (
+                  <button key={key ?? label} onClick={onClick} style={{ ...btnBase, gap: 4, background: active ? '#D4500A' : 'transparent', border: active ? '1.5px solid #D4500A' : '1.5px solid #3D1F0A', borderRadius: 4, padding: '4px 10px', whiteSpace: 'nowrap', color: active ? '#F5E6C8' : '#7A5A42', fontSize: 10, fontWeight: active ? 600 : 400, textTransform: 'uppercase', letterSpacing: '1px' }}>{icon}{label}</button>
+                ))}
+                <button onClick={() => setFilter(f => ({ ...f, onlySunny: !f.onlySunny }))} style={{ ...btnBase, gap: 4, background: filter.onlySunny ? '#D4500A' : 'rgba(212,80,10,0.12)', border: filter.onlySunny ? '1.5px solid #D4500A' : '1.5px solid rgba(212,80,10,0.4)', borderRadius: 4, padding: '4px 10px', whiteSpace: 'nowrap', color: filter.onlySunny ? '#F5E6C8' : '#C4703A', fontSize: 10, fontWeight: filter.onlySunny ? 600 : 400, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  <SunStatusIcon score={sunInfo?.score ?? 70} size={12} />Au soleil
+                </button>
+              </div>
+            </>
+          ) : (
+            /* ── Desktop : ligne unique 44px ── */
+            <>
+              <div className="topbar" style={{ background: '#D4500A', padding: '6px 20px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, position: 'relative', overflow: 'hidden' }}>
+                {/* Logo gauche */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                  <div style={{ position: 'relative', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ position: 'absolute', width: 19, height: 19, borderRadius: '50%', border: '1.5px solid #F5E6C8' }} />
+                    <div style={{ position: 'absolute', width: 12, height: 12, borderRadius: '50%', border: '1px solid #F5E6C8', opacity: 0.85 }} />
+                    <div style={{ position: 'absolute', width: 5, height: 5, borderRadius: '50%', background: '#F5E6C8' }} />
+                  </div>
+                  <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: '#F5E6C8', letterSpacing: 4, lineHeight: 1, textShadow: '2px 2px 0px rgba(0,0,0,0.2)' }}>HELIO</span>
+                </div>
+                {/* Recherche centre */}
+                <div style={{ flex: 1, margin: '0 16px', position: 'relative' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#1C0F06', borderRadius: 4, padding: '5px 10px', border: '1.5px solid #3D1F0A' }}>
+                    <IconSearch size={13} color="#7A5A42" />
+                    <input type="text" placeholder="Rechercher un lieu ou une terrasse..." value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      onFocus={() => setSearchFocused(true)}
+                      onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+                      style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', color: '#C4A882', fontSize: 12, fontFamily: "'Space Grotesk', sans-serif", minWidth: 0 }} />
+                    {loading && <span style={{ color: '#D4500A', fontSize: 11, fontWeight: 500, flexShrink: 0 }}>…</span>}
+                  </div>
+                  {searchFocused && searchResults.length > 0 && (
+                    <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: '#241208', borderRadius: 4, border: '1.5px solid #3D1F0A', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', overflow: 'hidden', zIndex: 1150 }}>
+                      {searchResults.map((place, i) => (
+                        <button key={place.id || i} onMouseDown={() => handleSuggestionClick(place)}
+                          style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', padding: '10px 14px', background: 'transparent', border: 'none', borderTop: i > 0 ? '1px solid #3D1F0A' : 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = '#1C0F06' }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: '#C4A882' }}>{place.displayName?.text}</span>
+                          {place.formattedAddress && <span style={{ fontSize: 11, color: '#7A5A42', marginTop: 2 }}>{place.formattedAddress}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {/* Boutons droite */}
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <button onClick={() => setFilterPanelOpen(true)} style={{ ...btnBase, background: 'rgba(0,0,0,0.2)', border: '1.5px solid rgba(245,230,200,0.3)', borderRadius: 4, padding: '5px 8px', gap: 4, color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1 }}>
+                    <IconSliders size={12} color="#F5E6C8" />FILTRES
+                  </button>
+                  <button onClick={() => setShowPlanifier(v => !v)} style={{ ...btnBase, background: 'rgba(0,0,0,0.3)', border: '1.5px solid #F5E6C8', borderRadius: 4, padding: '5px 8px', gap: 4, color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1 }}>
+                    <IconClock size={12} color="#F5E6C8" />PLANIFIER
+                  </button>
+                </div>
+              </div>
+              {/* Pills desktop */}
+              <div className="pills-scroll" style={{ background: '#1C0F06', borderBottom: '2px solid #3D1F0A', padding: '4px 12px 5px', display: 'flex', flexWrap: 'nowrap', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
+                {pillsConfig.map(({ key, label, active, onClick, icon }) => (
+                  <button key={key ?? label} onClick={onClick} style={{ ...btnBase, gap: 4, background: active ? '#D4500A' : 'transparent', border: active ? '1.5px solid #D4500A' : '1.5px solid #3D1F0A', borderRadius: 4, padding: '3px 8px', whiteSpace: 'nowrap', color: active ? '#F5E6C8' : '#7A5A42', fontSize: 10, fontWeight: active ? 600 : 400, textTransform: 'uppercase', letterSpacing: '1px' }}>{icon}{label}</button>
+                ))}
+                <button onClick={() => setFilter(f => ({ ...f, onlySunny: !f.onlySunny }))} style={{ ...btnBase, gap: 4, background: filter.onlySunny ? '#D4500A' : 'rgba(212,80,10,0.12)', border: filter.onlySunny ? '1.5px solid #D4500A' : '1.5px solid rgba(212,80,10,0.4)', borderRadius: 4, padding: '3px 8px', whiteSpace: 'nowrap', color: filter.onlySunny ? '#F5E6C8' : '#C4703A', fontSize: 10, fontWeight: filter.onlySunny ? 600 : 400, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  <SunStatusIcon score={sunInfo?.score ?? 70} size={12} />Au soleil
+                </button>
+              </div>
+            </>
+          )}
 
           {/* Bandeau mode planifier actif */}
           {planifActif && (
@@ -932,24 +907,24 @@ export default function App() {
           borderRadius: 4,
           boxShadow: '3px 3px 0px #D4500A',
           position: 'absolute', top: 145, left: 12, zIndex: 1100,
-          padding: isMobile ? '6px 10px' : '10px 14px',
-          minWidth: isMobile ? 'auto' : 170,
+          padding: isMobile ? '5px 8px' : '8px 12px',
+          minWidth: isMobile ? 'auto' : 150,
         }}>
           {isMobile ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <SunStatusIcon score={sunInfo.score} size={16} />
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: '#F4A460', letterSpacing: 2 }}>{sunInfo.label}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <SunStatusIcon score={sunInfo.score} size={14} />
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 14, color: '#F4A460', letterSpacing: 2 }}>{sunInfo.label}</div>
             </div>
           ) : (
             <>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 9, color: '#7A5A42', marginBottom: 6, letterSpacing: 2, textTransform: 'uppercase' }}>Soleil maintenant</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                <SunStatusIcon score={sunInfo.score} />
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: '#F4A460', letterSpacing: 2 }}>{sunInfo.label}</div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 8, color: '#7A5A42', marginBottom: 5, letterSpacing: 2, textTransform: 'uppercase' }}>Soleil maintenant</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+                <SunStatusIcon score={sunInfo.score} size={16} />
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 14, color: '#F4A460', letterSpacing: 2 }}>{sunInfo.label}</div>
               </div>
-              <div style={{ display: 'flex', gap: 10, borderTop: '1px solid #3D1F0A', paddingTop: 8 }}>
-                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 10, color: '#C4A882', letterSpacing: 1 }}>Lever {formatTime(sunInfo.sunrise)}</span>
-                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 10, color: '#C4A882', letterSpacing: 1 }}>Coucher {formatTime(sunInfo.sunset)}</span>
+              <div style={{ display: 'flex', gap: 8, borderTop: '1px solid #3D1F0A', paddingTop: 6 }}>
+                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 9, color: '#C4A882', letterSpacing: 1 }}>Lever {formatTime(sunInfo.sunrise)}</span>
+                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 9, color: '#C4A882', letterSpacing: 1 }}>Coucher {formatTime(sunInfo.sunset)}</span>
               </div>
             </>
           )}
@@ -1064,10 +1039,15 @@ export default function App() {
       {/* Floating time slider */}
       <div style={{
         ...panel,
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        zIndex: 1100, width: '100%',
-        borderRadius: '16px 16px 0 0',
-        padding: '12px 16px 20px',
+        position: 'absolute',
+        bottom: isMobile ? 20 : 30,
+        left: '50%', transform: 'translateX(-50%)',
+        zIndex: 1100,
+        width: isMobile ? 'calc(100vw - 24px)' : 480,
+        maxWidth: 480,
+        borderRadius: 16,
+        padding: '13px 18px',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
         opacity: (selectedTerrace || planifActif) ? 0 : 1,
         pointerEvents: (selectedTerrace || planifActif) ? 'none' : 'auto',
         transition: 'opacity 0.25s ease',
@@ -1671,7 +1651,7 @@ export default function App() {
         }}
         style={{
           position: 'absolute',
-          bottom: isMobile ? 120 : 100,
+          bottom: isMobile ? 'calc(100px + env(safe-area-inset-bottom))' : 80,
           right: 12,
           zIndex: 1100,
           width: 44,
@@ -1679,7 +1659,7 @@ export default function App() {
           borderRadius: 4,
           background: '#1C0F06',
           border: '1.5px solid #3D1F0A',
-          boxShadow: '2px 2px 0px #D4500A, 0 0 8px rgba(212,80,10,0.2)',
+          boxShadow: '2px 2px 0px #D4500A',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
