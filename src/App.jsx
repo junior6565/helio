@@ -13,7 +13,7 @@ const PARIS = { lat: 48.8566, lng: 2.3522 }
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
 
-function IconSun({ size = 20, color = '#F59E0B' }) {
+function IconSun({ size = 20, color = '#F4A460' }) {
   const c = size / 2
   const rays = [0, 45, 90, 135, 180, 225, 270, 315]
   return (
@@ -48,7 +48,7 @@ function IconCloud({ size = 20, color = '#94A3B8' }) {
   )
 }
 
-function IconSearch({ size = 17, color = '#9CA3AF' }) {
+function IconSearch({ size = 17, color = '#7A5A42' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -59,7 +59,7 @@ function IconSearch({ size = 17, color = '#9CA3AF' }) {
   )
 }
 
-function IconX({ size = 17, color = '#6B7280' }) {
+function IconX({ size = 17, color = '#C4A882' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke={color} strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0 }}>
@@ -69,7 +69,7 @@ function IconX({ size = 17, color = '#6B7280' }) {
   )
 }
 
-function IconNavigation({ size = 15, color = '#fff' }) {
+function IconNavigation({ size = 15, color = '#F4A460' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={{ flexShrink: 0 }}>
       <polygon points="3 11 22 2 13 21 11 13 3 11" />
@@ -77,7 +77,7 @@ function IconNavigation({ size = 15, color = '#fff' }) {
   )
 }
 
-function IconStar({ size = 13, color = '#F59E0B' }) {
+function IconStar({ size = 13, color = '#D4500A' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={{ flexShrink: 0 }}>
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -85,7 +85,7 @@ function IconStar({ size = 13, color = '#F59E0B' }) {
   )
 }
 
-function IconShare({ size = 16, color = '#374151' }) {
+function IconShare({ size = 16, color = '#8B6030' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -99,7 +99,7 @@ function IconShare({ size = 16, color = '#374151' }) {
   )
 }
 
-function IconSliders({ size = 15, color = '#374151' }) {
+function IconSliders({ size = 15, color = '#C4A882' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke={color} strokeWidth="2" strokeLinecap="round"
@@ -107,14 +107,14 @@ function IconSliders({ size = 15, color = '#374151' }) {
       <line x1="4" y1="6" x2="20" y2="6" />
       <line x1="4" y1="12" x2="20" y2="12" />
       <line x1="4" y1="18" x2="20" y2="18" />
-      <circle cx="9" cy="6" r="2" fill="white" />
-      <circle cx="15" cy="12" r="2" fill="white" />
-      <circle cx="9" cy="18" r="2" fill="white" />
+      <circle cx="9" cy="6" r="2" fill="#241208" />
+      <circle cx="15" cy="12" r="2" fill="#241208" />
+      <circle cx="9" cy="18" r="2" fill="#241208" />
     </svg>
   )
 }
 
-function IconClock({ size = 16, color = '#374151' }) {
+function IconClock({ size = 16, color = '#D4500A' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -125,7 +125,7 @@ function IconClock({ size = 16, color = '#374151' }) {
   )
 }
 
-function IconHelp({ size = 14, color = '#9CA3AF' }) {
+function IconHelp({ size = 14, color = '#7A5A42' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -137,7 +137,7 @@ function IconHelp({ size = 14, color = '#9CA3AF' }) {
   )
 }
 
-function IconMapPin({ size = 16, color = '#374151' }) {
+function IconMapPin({ size = 16, color = '#7A5A42' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -154,7 +154,6 @@ function formatTime(date) {
   return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 
-
 function getSunnyUntil(time, lat, lng) {
   const check = new Date(time)
   for (let i = 0; i < 96; i++) {
@@ -170,21 +169,21 @@ function getSunnyUntil(time, lat, lng) {
 }
 
 function markerColor(sunny) {
-  return sunny ? '#E8A020' : '#94A3B8'
+  return sunny ? '#D4500A' : '#A89060'
 }
 
 function SunStatusIcon({ score, size = 22 }) {
-  if (score === 0) return <IconMoon size={size} color="#64748B" />
-  const color = score >= 70 ? '#E8A020' : score >= 30 ? '#F07828' : '#F97316'
+  if (score === 0) return <IconMoon size={size} color="#7A5A42" />
+  const color = score >= 70 ? '#F4A460' : score >= 30 ? '#D4500A' : '#8B3A07'
   return <IconSun size={size} color={color} />
 }
 
 function StarRating({ rating }) {
-  if (!rating) return <span style={{ color: '#9CA3AF', fontSize: 12 }}>Aucune note</span>
+  if (!rating) return <span style={{ color: '#A89060', fontSize: 12 }}>Aucune note</span>
   return (
     <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-      <IconStar size={13} color="#F59E0B" />
-      <span style={{ fontWeight: 600, fontSize: 13, color: '#1C1C1E' }}>{rating.toFixed(1)}</span>
+      <IconStar size={13} color="#D4500A" />
+      <span style={{ fontWeight: 700, fontSize: 13, color: '#D4500A' }}>{rating.toFixed(1)}</span>
     </span>
   )
 }
@@ -192,10 +191,9 @@ function StarRating({ rating }) {
 // ─── Shared styles ────────────────────────────────────────────────────────────
 
 const panel = {
-  background: '#FFFFFF',
-  borderRadius: 12,
-  border: '1px solid #E5E7EB',
-  boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
+  background: '#1C0F06',
+  borderRadius: 4,
+  border: '1.5px solid #3D1F0A',
 }
 
 const btnBase = {
@@ -203,36 +201,36 @@ const btnBase = {
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 }
 
-// ─── TimeSlider component (reused floating + in bottom sheet) ─────────────────
+// ─── TimeSlider component ─────────────────────────────────────────────────────
 
 function TimeSlider({ time, timeSlots, onChange }) {
   const timeValue = time.getHours() * 60 + time.getMinutes()
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <span style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>Heure simulée</span>
-        <span style={{ fontSize: 20, fontWeight: 700, color: '#1C1C1E', letterSpacing: -0.5 }}>
+        <span style={{ fontSize: 9, color: '#7A5A42', fontWeight: 500, textTransform: 'uppercase', letterSpacing: 1 }}>Heure simulée</span>
+        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 24, color: '#F5E6C8', letterSpacing: 2, lineHeight: 1 }}>
           {time.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>
-      <div style={{ display: 'flex', gap: 1, marginBottom: 8, height: 5, borderRadius: 3, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', gap: 1, marginBottom: 8, height: 3, borderRadius: 2, overflow: 'hidden', background: '#3D1F0A' }}>
         {timeSlots.map((slot, i) => {
           const slotMin = slot.time.getHours() * 60 + slot.time.getMinutes()
           return (
             <div key={i} style={{
               flex: 1, borderRadius: 1, transition: 'background 0.2s',
               background: slotMin <= timeValue
-                ? (slot.score > 70 ? '#F59E0B' : slot.score > 40 ? '#FB923C' : '#CBD5E1')
-                : '#F3F4F6',
+                ? (slot.score > 70 ? '#F4A460' : slot.score > 40 ? '#D4500A' : '#5C2E12')
+                : '#3D1F0A',
             }} />
           )
         })}
       </div>
       <input type="range" min={480} max={1320} step={30} value={timeValue} onChange={onChange}
-        style={{ width: '100%', accentColor: '#F59E0B', cursor: 'pointer' }} />
+        style={{ width: '100%', accentColor: '#F4A460', cursor: 'pointer' }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-        <span style={{ fontSize: 11, color: '#9CA3AF' }}>08:00</span>
-        <span style={{ fontSize: 11, color: '#9CA3AF' }}>22:00</span>
+        <span style={{ fontSize: 9, color: '#5C3A22' }}>08:00</span>
+        <span style={{ fontSize: 9, color: '#5C3A22' }}>22:00</span>
       </div>
     </>
   )
@@ -434,7 +432,9 @@ export default function App() {
         if (!terrace || !dot) return
         const sunny = getShadowStatus(terrace, timeRef.current)
         dot.style.background = markerColor(sunny)
-        dot.style.boxShadow = sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'
+        dot.style.boxShadow = sunny
+          ? '0 0 0 3px rgba(212,80,10,0.2), 3px 3px 0px rgba(139,58,7,0.4)'
+          : '0 1px 4px rgba(0,0,0,0.15)'
       })
     }
 
@@ -529,7 +529,6 @@ export default function App() {
       return count
     }
 
-    // Baseline à midi : lit une fois par lot de terrasses, stocke dans baselineCacheRef
     const needsBaseline = terracesRef.current.some(t => baselineCacheRef.current[t.id] === undefined)
     if (needsBaseline && osmbRef.current) {
       const noon = new Date(timeRef.current)
@@ -555,7 +554,6 @@ export default function App() {
     })
 
     const totalRead = Object.keys(newCache).length
-    const sunnyCount = Object.values(newCache).filter(Boolean).length
     if (totalRead > 0) {
       shadowCacheRef.current = newCache
       setShadowVersion(v => v + 1)
@@ -571,7 +569,9 @@ export default function App() {
         if (!terrace || !dot) return
         const sunny = getShadowStatus(terrace, timeRef.current)
         dot.style.background = markerColor(sunny)
-        dot.style.boxShadow = sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'
+        dot.style.boxShadow = sunny
+          ? '0 0 0 3px rgba(212,80,10,0.2), 3px 3px 0px rgba(139,58,7,0.4)'
+          : '0 1px 4px rgba(0,0,0,0.15)'
       })
     }, delay)
   }, [readShadowPixels, getShadowStatus])
@@ -614,15 +614,20 @@ export default function App() {
       const sunny = planifActif ? true : getShadowStatus(terrace, timeRef.current)
       const color = markerColor(sunny)
       const isUnconfirmed = terrace.hasOutdoorSeating === null
-      const dotBorder = isUnconfirmed ? '2px dashed #ffffff' : '2px solid #ffffff'
+      const dotBorder = isUnconfirmed
+        ? '2.5px dashed #F5E6C8'
+        : (sunny ? '3px solid #F5E6C8' : '2.5px solid #F5EFE0')
       const dotOpacity = isUnconfirmed ? '0.75' : '1'
       const sz = isMobile ? '28px' : '20px'
+      const shadowVal = sunny
+        ? '0 0 0 3px rgba(212,80,10,0.2), 3px 3px 0px rgba(139,58,7,0.4)'
+        : '0 1px 4px rgba(0,0,0,0.15)'
 
       const icon = L.divIcon({
         className: '',
         html: `<div style="position:relative;width:36px;height:36px;">
           <div class="mk-ring" style="position:absolute;top:50%;left:50%;width:36px;height:36px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid transparent;opacity:0;transition:all 0.2s ease;pointer-events:none;box-sizing:border-box;"></div>
-          <div class="mk-dot" style="position:absolute;top:50%;left:50%;width:${sz};height:${sz};border-radius:50%;transform:translate(-50%,-50%);border:${dotBorder};cursor:pointer;background:${color};box-shadow:${sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'};opacity:${dotOpacity};transition:width 0.2s ease,height 0.2s ease,background 0.2s ease,box-shadow 0.2s ease;box-sizing:border-box;"></div>
+          <div class="mk-dot" style="position:absolute;top:50%;left:50%;width:${sz};height:${sz};border-radius:50%;transform:translate(-50%,-50%);border:${dotBorder};cursor:pointer;background:${color};box-shadow:${shadowVal};opacity:${dotOpacity};transition:width 0.2s ease,height 0.2s ease,background 0.2s ease,box-shadow 0.2s ease;box-sizing:border-box;"></div>
         </div>`,
         iconSize: [36, 36],
         iconAnchor: [18, 18],
@@ -654,15 +659,16 @@ export default function App() {
     })
   }, [mapReady, terraces, filter, shadowVersion, planifActif, planifResultats, isMobile])
 
-  // ── Dot color update on time change (sans recréer le DOM) ────────────────
+  // ── Dot color update on time change ──────────────────────────────────────
   useEffect(() => {
     Object.entries(markersRef.current).forEach(([id, { dot }]) => {
       const t = terracesRef.current.find(x => x.id === id)
       if (!t) return
       const sunny = getShadowStatus(t, time)
-      const color = markerColor(sunny)
-      dot.style.background = color
-      dot.style.boxShadow = sunny ? '0 2px 8px rgba(0,0,0,0.28)' : '0 1px 4px rgba(0,0,0,0.15)'
+      dot.style.background = markerColor(sunny)
+      dot.style.boxShadow = sunny
+        ? '0 0 0 3px rgba(212,80,10,0.2), 3px 3px 0px rgba(139,58,7,0.4)'
+        : '0 1px 4px rgba(0,0,0,0.15)'
     })
   }, [time])
 
@@ -689,9 +695,7 @@ export default function App() {
         Math.max(map.current.getZoom(), 17),
         { duration: 0.8 }
       )
-      map.current.once('moveend', () => {
-        flyingRef.current = false
-      })
+      map.current.once('moveend', () => { flyingRef.current = false })
     }
   }, [selectedTerrace])
 
@@ -714,12 +718,11 @@ export default function App() {
     ? `https://places.googleapis.com/v1/${selectedTerrace.photoRef}/media?maxHeightPx=300&maxWidthPx=600&key=${GOOGLE_PLACES_KEY}`
     : null
 
-
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div style={{ width: '100vw', height: '100dvh', position: 'relative', fontFamily: "'Space Grotesk', -apple-system, sans-serif" }}>
 
-      {/* Map — isolation:isolate contient les z-index Leaflet (jusqu'à 800) */}
+      {/* Map */}
       <div ref={mapContainer} style={{ position: 'absolute', inset: 0, zIndex: 0, isolation: 'isolate' }} />
 
       {/* Search bar + quick filter pills */}
@@ -727,27 +730,37 @@ export default function App() {
         position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
         width: 'calc(100vw - 24px)', maxWidth: 540, zIndex: 1100,
       }}>
-        <div style={{ ...panel, display: 'flex', flexDirection: 'column' }}>
-          {/* Bandeau orange helio */}
-          <div style={{
-            background: '#E8940A',
-            padding: isMobile ? '8px 14px' : '10px 14px',
-            display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8,
-            borderRadius: '14px 14px 0 0',
+        <div style={{ ...panel, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+          {/* TOPBAR */}
+          <div className="topbar" style={{
+            background: '#D4500A',
+            padding: isMobile ? '14px 16px 12px' : '18px 20px 16px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+            position: 'relative', overflow: 'hidden',
           }}>
-            <div style={{ position: 'relative', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <div style={{ position: 'absolute', width: 16, height: 16, borderRadius: '50%', border: '1.5px solid white' }} />
-              <div style={{ position: 'absolute', width: 10, height: 10, borderRadius: '50%', border: '1.5px solid white' }} />
-              <div style={{ position: 'absolute', width: 4, height: 4, borderRadius: '50%', background: 'white' }} />
+            {/* Soleil géométrique */}
+            <div style={{ position: 'relative', width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
+              <div style={{ position: 'absolute', width: 56, height: 56, borderRadius: '50%', background: 'rgba(245,230,200,0.15)', boxShadow: '0 0 0 8px rgba(245,230,200,0.08), 0 0 0 16px rgba(245,230,200,0.04)' }} />
+              <div style={{ position: 'absolute', width: 48, height: 48, borderRadius: '50%', border: '2.5px solid #F5E6C8' }} />
+              <div style={{ position: 'absolute', width: 32, height: 32, borderRadius: '50%', border: '2px solid #F5E6C8', opacity: 0.8 }} />
+              <div style={{ position: 'absolute', width: 14, height: 14, borderRadius: '50%', background: '#F5E6C8', boxShadow: '0 0 12px rgba(245,230,200,0.6)' }} />
             </div>
-            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: isMobile ? 16 : 17, fontWeight: 700, color: 'white', letterSpacing: '-0.5px' }}>helio</span>
+            {/* Titre */}
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isMobile ? 36 : 40, color: '#F5E6C8', letterSpacing: 6, lineHeight: 1, zIndex: 1, textShadow: '3px 3px 0px rgba(0,0,0,0.2)' }}>
+              HELIO
+            </span>
+            {/* Sous-titre */}
+            <span style={{ fontSize: 9, color: 'rgba(245,230,200,0.6)', letterSpacing: 4, textTransform: 'uppercase', zIndex: 1, marginTop: -6 }}>
+              Paris · Terrasses au soleil
+            </span>
           </div>
 
-          {/* Ligne recherche + boutons */}
-          <div style={{ position: 'relative' }}>
-            <div style={{ padding: '7px 10px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, background: '#F9F9F9', borderRadius: 20, padding: '7px 14px', border: '0.5px solid #E8D8B0', minWidth: 0 }}>
-                <IconSearch size={14} color="#9CA3AF" />
+          {/* SEARCHBAR */}
+          <div style={{ background: '#241208', borderBottom: '2px solid #3D1F0A', padding: '10px 14px', position: 'relative' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, background: '#1C0F06', borderRadius: 4, padding: '7px 12px', border: '1.5px solid #3D1F0A', minWidth: 0 }}>
+                <IconSearch size={14} color="#7A5A42" />
                 <input
                   type="text"
                   placeholder={isMobile ? 'Rechercher...' : 'Rechercher un lieu ou une terrasse...'}
@@ -757,32 +770,33 @@ export default function App() {
                   onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
                   style={{
                     flex: 1, border: 'none', outline: 'none', background: 'transparent',
-                    color: '#1C1C1E', fontSize: 12, fontFamily: 'inherit', minWidth: 0,
+                    color: '#C4A882', fontSize: 12, fontFamily: "'Space Grotesk', sans-serif", minWidth: 0,
                   }}
                 />
-                {loading && <span style={{ color: '#F59E0B', fontSize: 11, fontWeight: 500, flexShrink: 0 }}>…</span>}
+                {loading && <span style={{ color: '#D4500A', fontSize: 11, fontWeight: 500, flexShrink: 0 }}>…</span>}
               </div>
               <button
                 onClick={() => setFilterPanelOpen(true)}
                 style={{
-                  ...btnBase, background: '#F9F9F9', border: '0.5px solid #E5E7EB',
-                  borderRadius: 20, padding: isMobile ? '7px 8px' : '7px 10px', gap: 4, flexShrink: 0,
-                  color: '#374151', fontSize: 11,
+                  ...btnBase, background: 'transparent', border: '1.5px solid #5C2E12',
+                  borderRadius: 4, padding: isMobile ? '8px 10px' : '8px 10px', gap: 4, flexShrink: 0,
+                  color: '#C4A882', fontFamily: "'Bebas Neue', sans-serif", fontSize: 14, letterSpacing: 2,
                 }}
               >
-                <IconSliders size={13} color="#374151" />
-                {!isMobile && 'Filtres'}
+                <IconSliders size={13} color="#C4A882" />
+                {!isMobile && 'FILTRES'}
               </button>
               <button
                 onClick={() => setShowPlanifier(v => !v)}
                 style={{
-                  ...btnBase, background: '#E8940A', border: 'none',
-                  borderRadius: 20, padding: isMobile ? '7px 8px' : '7px 10px', gap: 4, flexShrink: 0,
-                  color: '#fff', fontSize: 11, fontWeight: 500,
+                  ...btnBase, background: '#D4500A', border: 'none',
+                  borderRadius: 4, padding: isMobile ? '8px 10px' : '8px 12px', gap: 4, flexShrink: 0,
+                  color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", fontSize: 14, letterSpacing: 2,
+                  boxShadow: '2px 2px 0px #8B3A07',
                 }}
               >
-                <IconClock size={13} color="#fff" />
-                {!isMobile && 'Planifier'}
+                <IconClock size={13} color="#F5E6C8" />
+                {!isMobile && 'PLANIFIER'}
               </button>
             </div>
 
@@ -790,8 +804,8 @@ export default function App() {
             {searchFocused && searchResults.length > 0 && (
               <div style={{
                 position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
-                background: '#fff', borderRadius: 12,
-                border: '1px solid #E5E7EB', boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                background: '#241208', borderRadius: 4,
+                border: '1.5px solid #3D1F0A', boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
                 overflow: 'hidden', zIndex: 1150,
               }}>
                 {searchResults.map((place, i) => (
@@ -802,17 +816,17 @@ export default function App() {
                       display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
                       width: '100%', padding: '10px 14px',
                       background: 'transparent', border: 'none',
-                      borderTop: i > 0 ? '1px solid #F3F4F6' : 'none',
+                      borderTop: i > 0 ? '1px solid #3D1F0A' : 'none',
                       cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.background = '#F9FAFB' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#1C0F06' }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                   >
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#1C1C1E' }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#C4A882' }}>
                       {place.displayName?.text}
                     </span>
                     {place.formattedAddress && (
-                      <span style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>
+                      <span style={{ fontSize: 11, color: '#7A5A42', marginTop: 2 }}>
                         {place.formattedAddress}
                       </span>
                     )}
@@ -822,46 +836,48 @@ export default function App() {
             )}
           </div>
 
-          {/* Niveau 2 : pills */}
+          {/* PILLS */}
           <div className="pills-scroll" style={{
-            borderTop: '0.5px solid #F3F4F6', padding: '6px 12px 8px',
+            background: '#1C0F06', borderBottom: '2px solid #3D1F0A',
+            padding: '6px 12px 8px',
             display: 'flex', flexWrap: 'nowrap', gap: 6, overflowX: 'auto',
             scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
-            paddingBottom: 2,
           }}>
             {[
-              { label: 'Ouvert maintenant', active: filter.onlyOpen, onClick: () => setFilter(f => ({ ...f, onlyOpen: !f.onlyOpen })) },
-              { label: '4+ étoiles', active: filter.minRating >= 4, onClick: () => setFilter(f => ({ ...f, minRating: f.minRating >= 4 ? 0 : 4 })), icon: <IconStar size={11} color={filter.minRating >= 4 ? '#8B6914' : '#F59E0B'} /> },
+              { label: 'Ouvert', active: filter.onlyOpen, onClick: () => setFilter(f => ({ ...f, onlyOpen: !f.onlyOpen })) },
+              { label: '4+ étoiles', active: filter.minRating >= 4, onClick: () => setFilter(f => ({ ...f, minRating: f.minRating >= 4 ? 0 : 4 })), icon: <IconStar size={10} color={filter.minRating >= 4 ? '#F5E6C8' : '#D4500A'} /> },
               { label: 'Bar', active: filter.type === 'bar', onClick: () => setFilter(f => ({ ...f, type: f.type === 'bar' ? 'all' : 'bar' })) },
               { label: 'Café', active: filter.type === 'café', onClick: () => setFilter(f => ({ ...f, type: f.type === 'café' ? 'all' : 'café' })) },
-              { key: 'sunny', label: 'Au soleil', active: filter.onlySunny, onClick: () => setFilter(f => ({ ...f, onlySunny: !f.onlySunny })), icon: <SunStatusIcon score={sunInfo?.score ?? 70} size={13} /> },
+              { key: 'sunny', label: 'Au soleil', active: filter.onlySunny, onClick: () => setFilter(f => ({ ...f, onlySunny: !f.onlySunny })), icon: <SunStatusIcon score={sunInfo?.score ?? 70} size={12} /> },
             ].map(({ key, label, active, onClick, icon }) => (
               <button key={key ?? label} onClick={onClick} style={{
                 ...btnBase, gap: 4,
-                background: active ? '#FFF7E6' : 'transparent',
-                border: active ? '1.5px solid #E8940A' : '1.5px solid #E5E7EB',
-                borderRadius: 20, padding: '5px 12px', whiteSpace: 'nowrap',
-                color: active ? '#8B6914' : '#374151',
-                fontSize: 12, fontWeight: active ? 600 : 400,
+                background: active ? '#D4500A' : 'transparent',
+                border: active ? '1.5px solid #D4500A' : '1.5px solid #3D1F0A',
+                borderRadius: 4, padding: '4px 10px', whiteSpace: 'nowrap',
+                color: active ? '#F5E6C8' : '#7A5A42',
+                fontSize: 10, fontWeight: active ? 600 : 400,
+                textTransform: 'uppercase', letterSpacing: '1px',
               }}>
                 {icon}{label}
               </button>
             ))}
           </div>
 
-          {/* Bandeau mode planifier */}
+          {/* Bandeau mode planifier actif */}
           {planifActif && (
             <div style={{
-              background: '#FFF7E6', borderRadius: 8, margin: '6px 10px 0',
-              padding: '7px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              background: '#241208', border: '1.5px solid #3D1F0A', borderRadius: 4,
+              margin: '6px 10px 6px', padding: '7px 12px',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <IconClock size={13} color="#E8940A" />
-                <span style={{ fontSize: 12, color: '#8B6914', fontWeight: 500 }}>
+                <IconClock size={13} color="#D4500A" />
+                <span style={{ fontSize: 12, color: '#F4A460', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 1 }}>
                   {planifQuartier || 'Paris'} · {planifExposition === 'soleil' ? 'Au soleil' : "À l'ombre"} · {planifDebut} → {planifFin}
                 </span>
               </div>
-              <span style={{ fontSize: 12, color: '#8B6914', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 12, color: '#7A5A42', whiteSpace: 'nowrap' }}>
                 {planifResultats.length} terrasse{planifResultats.length > 1 ? 's' : ''}
               </span>
             </div>
@@ -869,7 +885,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* Bouton flottant "Rechercher dans cette zone" */}
+      {/* Bouton "Rechercher dans cette zone" */}
       {showSearchHere && (
         <div style={{
           position: 'absolute',
@@ -885,28 +901,25 @@ export default function App() {
               setShowSearchHere(false)
             }}
             style={{
-              background: 'white', border: '1px solid #E8D8B0', borderRadius: 20,
-              padding: '7px 18px', fontSize: 12, color: '#374151',
-              fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500,
-              cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.10)',
+              background: '#1C0F06', border: '2px solid #D4500A', borderRadius: 4,
+              padding: '7px 18px', fontSize: 13,
+              color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 2,
+              cursor: 'pointer', boxShadow: '3px 3px 0px #D4500A',
               display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
             }}
           >
-            <IconSearch size={12} color="#E8940A" />
-            Rechercher dans cette zone
+            ↻ RECHERCHER ICI
           </button>
         </div>
       )}
 
-      {/* Sun widget — top left */}
+      {/* Sun widget */}
       {sunInfo && (
         <div style={{
-          background: 'rgba(255,251,242,0.92)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          borderRadius: isMobile ? 12 : 16,
-          border: '0.5px solid rgba(232,148,10,0.2)',
-          boxShadow: 'none',
+          background: '#1C0F06',
+          border: '1.5px solid #3D1F0A',
+          borderRadius: 4,
+          boxShadow: '3px 3px 0px #D4500A',
           position: 'absolute', top: isMobile ? 185 : 114, left: 12, zIndex: 1100,
           padding: isMobile ? '6px 10px' : '10px 14px',
           minWidth: isMobile ? 'auto' : 170,
@@ -914,19 +927,16 @@ export default function App() {
           {isMobile ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <SunStatusIcon score={sunInfo.score} size={16} />
-              <div style={{ fontWeight: 600, fontSize: 12, color: sunInfo.color }}>{sunInfo.label}</div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, color: '#F4A460', letterSpacing: 2 }}>{sunInfo.label}</div>
             </div>
           ) : (
             <>
-              <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>Soleil maintenant</div>
+              <div style={{ fontSize: 9, color: '#7A5A42', marginBottom: 6, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 1 }}>Soleil maintenant</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
                 <SunStatusIcon score={sunInfo.score} />
-                <div style={{ fontWeight: 600, fontSize: 13, color: sunInfo.color }}>{sunInfo.label}</div>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, color: '#F4A460', letterSpacing: 2 }}>{sunInfo.label}</div>
               </div>
-              <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 8, fontWeight: 500, marginTop: 6 }}>
-                24°C · Dégagé
-              </div>
-              <div style={{ display: 'flex', gap: 10, fontSize: 11, color: '#9CA3AF', borderTop: '1px solid #F3F4F6', paddingTop: 8 }}>
+              <div style={{ display: 'flex', gap: 10, fontSize: 9, color: '#5C3A22', borderTop: '1px solid #3D1F0A', paddingTop: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
                 <span>Lever {formatTime(sunInfo.sunrise)}</span>
                 <span>Coucher {formatTime(sunInfo.sunset)}</span>
               </div>
@@ -939,55 +949,58 @@ export default function App() {
       <div
         onClick={() => setFilterPanelOpen(false)}
         style={{
-          position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)',
+          position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)',
           zIndex: 1125, opacity: filterPanelOpen ? 1 : 0,
           pointerEvents: filterPanelOpen ? 'auto' : 'none',
           transition: 'opacity 0.25s ease',
         }}
       />
 
-      {/* Filter panel — bottom sheet on mobile, slides from right on desktop */}
+      {/* Filter panel */}
       <div style={isMobile ? {
         position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: '#fff', zIndex: 1300,
-        borderRadius: '16px 16px 0 0',
+        background: '#1C0F06', zIndex: 1300,
+        borderRadius: '4px 4px 0 0',
+        borderTop: '2px solid #3D1F0A',
         maxHeight: '80vh', overflowY: 'auto',
         paddingBottom: 'env(safe-area-inset-bottom)',
         transform: filterPanelOpen ? 'translateY(0)' : 'translateY(100%)',
         transition: 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
-        boxShadow: '0 -4px 28px rgba(0,0,0,0.14)',
+        boxShadow: '-4px 0 20px rgba(0,0,0,0.5)',
       } : {
         position: 'absolute', top: 0, bottom: 0, right: 0,
-        width: 300, background: '#fff', zIndex: 1130,
+        width: 300, background: '#1C0F06', zIndex: 1130,
+        borderLeft: '2px solid #3D1F0A',
         transform: filterPanelOpen ? 'translateX(0)' : 'translateX(100%)',
         transition: 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
-        boxShadow: '-4px 0 24px rgba(0,0,0,0.14)',
+        boxShadow: '-4px 0 20px rgba(0,0,0,0.5)',
         overflowY: 'auto', display: 'flex', flexDirection: 'column',
       }}>
         <div style={{ padding: '20px 18px', display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 16, fontWeight: 700, color: '#1C1C1E' }}>Filtres</span>
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 24, color: '#F5E6C8', letterSpacing: 3 }}>Filtres</span>
             <button
               onClick={() => setFilterPanelOpen(false)}
-              style={{ ...btnBase, background: '#F3F4F6', borderRadius: '50%', width: 32, height: 32 }}
+              style={{ ...btnBase, background: '#241208', border: '1.5px solid #3D1F0A', borderRadius: 4, width: 32, height: 32 }}
             >
-              <IconX size={16} />
+              <IconX size={16} color="#C4A882" />
             </button>
           </div>
 
           {/* Rating */}
           <div>
-            <div style={{ fontSize: 13, color: '#374151', marginBottom: 8, fontWeight: 600 }}>Note minimum</div>
+            <div style={{ fontSize: 11, color: '#7A5A42', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Note minimum</div>
             <div style={{ display: 'flex', gap: 6 }}>
               {[0, 3.5, 4, 4.5].map(r => (
                 <button key={r} onClick={() => setFilter(f => ({ ...f, minRating: r }))} style={{
                   ...btnBase,
-                  background: filter.minRating === r ? '#E8940A' : '#F9FAFB',
-                  border: filter.minRating === r ? 'none' : '0.5px solid #E5E7EB',
-                  borderRadius: 8, padding: '6px 10px',
-                  color: filter.minRating === r ? '#fff' : '#374151',
+                  background: filter.minRating === r ? '#D4500A' : '#241208',
+                  border: filter.minRating === r ? '1.5px solid #D4500A' : '1.5px solid #3D1F0A',
+                  borderRadius: 4, padding: '6px 10px',
+                  color: filter.minRating === r ? '#F5E6C8' : '#7A5A42',
                   fontSize: 12, fontWeight: 600,
+                  boxShadow: filter.minRating === r ? '2px 2px 0px #8B3A07' : 'none',
                 }}>
                   {r === 0 ? 'Tous' : `${r}+`}
                 </button>
@@ -997,16 +1010,17 @@ export default function App() {
 
           {/* Type */}
           <div>
-            <div style={{ fontSize: 13, color: '#374151', marginBottom: 8, fontWeight: 600 }}>Type</div>
+            <div style={{ fontSize: 11, color: '#7A5A42', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Type</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {['all', 'café', 'bar', 'restaurant'].map(t => (
                 <button key={t} onClick={() => setFilter(f => ({ ...f, type: t }))} style={{
                   ...btnBase,
-                  background: filter.type === t ? '#E8940A' : '#F9FAFB',
-                  border: filter.type === t ? 'none' : '0.5px solid #E5E7EB',
-                  borderRadius: 8, padding: '6px 12px',
-                  color: filter.type === t ? '#fff' : '#374151',
+                  background: filter.type === t ? '#D4500A' : '#241208',
+                  border: filter.type === t ? '1.5px solid #D4500A' : '1.5px solid #3D1F0A',
+                  borderRadius: 4, padding: '6px 12px',
+                  color: filter.type === t ? '#F5E6C8' : '#7A5A42',
                   fontSize: 12, fontWeight: 600,
+                  boxShadow: filter.type === t ? '2px 2px 0px #8B3A07' : 'none',
                 }}>
                   {t === 'all' ? 'Tous' : t.charAt(0).toUpperCase() + t.slice(1)}
                 </button>
@@ -1018,16 +1032,17 @@ export default function App() {
           <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
             <input type="checkbox" checked={filter.onlyOpen}
               onChange={e => setFilter(f => ({ ...f, onlyOpen: e.target.checked }))}
-              style={{ accentColor: '#F59E0B', width: 16, height: 16 }} />
-            <span style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>Ouvert maintenant</span>
+              style={{ accentColor: '#D4500A', width: 16, height: 16 }} />
+            <span style={{ fontSize: 13, color: '#C4A882', fontWeight: 500 }}>Ouvert maintenant</span>
           </label>
 
           {/* Reset */}
           <button
             onClick={() => { setFilter({ minRating: 0, type: 'all', onlyOpen: false, onlySunny: false }); setFilterPanelOpen(false) }}
             style={{
-              ...btnBase, border: '1px solid #E5E7EB', borderRadius: 8, padding: '10px',
-              background: '#F9FAFB', color: '#374151', fontSize: 13, fontWeight: 500, marginTop: 4,
+              ...btnBase, border: '1.5px solid #3D1F0A', borderRadius: 4, padding: '10px',
+              background: 'transparent', color: '#7A5A42', fontSize: 13, fontWeight: 500, marginTop: 4,
+              fontFamily: "'Space Grotesk', sans-serif",
             }}
           >
             Réinitialiser les filtres
@@ -1062,8 +1077,9 @@ export default function App() {
         style={{
           position: 'absolute', bottom: 0, left: '50%',
           transform: `translateX(-50%) translateY(${selectedTerrace ? '0%' : '110%'})`,
-          background: '#FFFFFF', borderRadius: '20px 20px 0 0',
-          boxShadow: '0 -8px 40px rgba(0,0,0,0.10)',
+          background: '#F5E6C8', borderRadius: '20px 20px 0 0',
+          borderTop: '3px solid #D4500A',
+          boxShadow: '0 -8px 40px rgba(0,0,0,0.3)',
           width: '100%', maxWidth: 480, zIndex: 1120,
           transition: 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
           maxHeight: isMobile ? '60vh' : 'none',
@@ -1072,30 +1088,30 @@ export default function App() {
       >
         {selectedTerrace && (
           <>
-            {/* Collapsed header — always visible */}
+            {/* Collapsed header */}
             <div style={{
               padding: '10px 20px 14px',
               paddingBottom: isMobile ? 'calc(14px + env(safe-area-inset-bottom))' : 14,
               position: isMobile ? 'sticky' : 'static', top: 0,
-              background: '#fff', zIndex: 1,
+              background: '#F5E6C8', zIndex: 1,
             }}>
-              {/* Ligne 1 : drag bar */}
+              {/* Drag bar */}
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
                 <div
                   onClick={() => setSheetExpanded(v => !v)}
-                  style={{ width: 36, height: 4, borderRadius: 2, background: '#E5E7EB', cursor: 'pointer' }}
+                  style={{ width: 36, height: 4, borderRadius: 2, background: '#C4A060', cursor: 'pointer' }}
                 />
               </div>
-              {/* Ligne 2 : nom + chevron + croix */}
+              {/* Nom + chevron + croix */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                 <h2
                   onClick={() => setSheetExpanded(v => !v)}
-                  style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#1C1C1E', flex: 1, paddingRight: 8, lineHeight: 1.25, cursor: 'pointer', fontFamily: "'Syne', sans-serif", letterSpacing: '-0.5px' }}
+                  style={{ margin: 0, fontFamily: "'Bebas Neue', sans-serif", fontSize: 32, color: '#1C0F06', flex: 1, paddingRight: 8, lineHeight: 1.1, cursor: 'pointer', letterSpacing: 3 }}
                 >
                   {selectedTerrace.name}
                 </h2>
                 <svg
-                  width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7280"
+                  width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A89060"
                   strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                   onClick={() => setSheetExpanded(v => !v)}
                   style={{ cursor: 'pointer', flexShrink: 0, marginRight: 8 }}
@@ -1107,24 +1123,24 @@ export default function App() {
                 </svg>
                 <button
                   onClick={() => { setSelectedTerrace(null); setSheetExpanded(false) }}
-                  style={{ border: 'none', background: '#F3F4F6', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                  style={{ border: '1.5px solid #3D1F0A', background: '#1C0F06', borderRadius: 4, width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                 >
-                  <IconX size={14} />
+                  <IconX size={14} color="#C4A882" />
                 </button>
               </div>
-              {/* Ligne 3 : badge soleil */}
+              {/* Badge soleil/ombre */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{
                   display: 'inline-flex', alignItems: 'center', gap: 8,
-                  padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600,
-                  background: selectedSunny ? 'linear-gradient(135deg, #FFF7E6 0%, #FEF0D0 100%)' : '#F3F4F6',
-                  border: selectedSunny ? '1.5px solid #E8940A' : '1.5px solid #D1D5DB',
+                  padding: '8px 14px', borderRadius: 4, fontSize: 13,
+                  background: selectedSunny ? '#1C0F06' : '#3D2415',
+                  boxShadow: selectedSunny ? '3px 3px 0px #D4500A' : 'none',
                 }}>
                   {selectedSunny
-                    ? <IconSun size={16} color="#F59E0B" />
-                    : <IconCloud size={16} color="#9CA3AF" />
+                    ? <IconSun size={16} color="#F4A460" />
+                    : <IconCloud size={16} color="#A89060" />
                   }
-                  <span style={{ fontSize: 14, fontWeight: 700, color: selectedSunny ? '#92400E' : '#6B7280' }}>
+                  <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 15, color: selectedSunny ? '#F4A460' : '#C4A882', letterSpacing: 1 }}>
                     {selectedSunny
                       ? (sunnyUntil ? (sunnyUntil.soon ? "À l'ombre bientôt" : `Ensoleillé jusqu'à ${formatTime(sunnyUntil.time)}`) : 'Ensoleillé toute la soirée')
                       : "À l'ombre actuellement"
@@ -1139,7 +1155,7 @@ export default function App() {
 
                 if (confirmation === 'confirmed') {
                   return (
-                    <div style={{ marginTop: 8, fontSize: 11, color: '#E8940A', fontWeight: 500 }}>
+                    <div style={{ marginTop: 8, fontSize: 11, color: '#D4500A', fontWeight: 500 }}>
                       ✓ Terrasse confirmée par la communauté
                     </div>
                   )
@@ -1151,10 +1167,10 @@ export default function App() {
                   return (
                     <div style={{
                       marginTop: 10,
-                      background: '#FFFBF2', border: '1px solid #E8D8B0',
-                      borderRadius: 12, padding: '12px 14px',
+                      background: '#EDD9A8', border: '1.5px solid #C4A060',
+                      borderRadius: 4, padding: '12px 14px',
                     }}>
-                      <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 10px', lineHeight: 1.5 }}>
+                      <p style={{ fontSize: 11, color: '#6B4A2A', margin: '0 0 10px', lineHeight: 1.5 }}>
                         Nous ne pouvons pas garantir que cet établissement dispose d'une terrasse. Le savez-vous ?
                       </p>
                       <div style={{ display: 'flex', gap: 8 }}>
@@ -1165,10 +1181,11 @@ export default function App() {
                             localStorage.setItem('helio_terrace_confirmations', JSON.stringify(updated))
                           }}
                           style={{
-                            flex: 1, background: '#E8940A', border: 'none',
-                            borderRadius: 20, padding: '8px 0', fontSize: 12,
-                            color: 'white', fontWeight: 500, cursor: 'pointer',
-                            fontFamily: "'Space Grotesk', sans-serif",
+                            flex: 1, background: '#D4500A', border: 'none',
+                            borderRadius: 4, padding: '8px 0', fontSize: 14,
+                            color: '#F5E6C8', cursor: 'pointer',
+                            fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 2,
+                            boxShadow: '2px 2px 0px #8B3A07',
                           }}
                         >
                           Oui, il y en a une
@@ -1181,9 +1198,9 @@ export default function App() {
                             setSelectedTerrace(null)
                           }}
                           style={{
-                            flex: 1, background: 'white', border: '1px solid #E5E7EB',
-                            borderRadius: 20, padding: '8px 0', fontSize: 12,
-                            color: '#6B7280', cursor: 'pointer',
+                            flex: 1, background: 'transparent', border: '1.5px solid #C4A060',
+                            borderRadius: 4, padding: '8px 0', fontSize: 12,
+                            color: '#8B6030', cursor: 'pointer',
                             fontFamily: "'Space Grotesk', sans-serif",
                           }}
                         >
@@ -1196,9 +1213,11 @@ export default function App() {
 
                 return null
               })()}
-              {/* Ligne 4 : slider */}
-              <div style={{ borderTop: '1px solid #F3F4F6', paddingTop: 12 }}>
-                <TimeSlider time={time} timeSlots={timeSlots} onChange={handleTimeChange} />
+              {/* Slider */}
+              <div style={{ borderTop: '2px solid #C4A060', paddingTop: 12, marginTop: 8 }}>
+                <div style={{ background: '#1C0F06', borderRadius: 4, padding: '10px 12px', border: '1.5px solid #3D1F0A' }}>
+                  <TimeSlider time={time} timeSlots={timeSlots} onChange={handleTimeChange} />
+                </div>
               </div>
             </div>
 
@@ -1210,22 +1229,22 @@ export default function App() {
                   <img
                     src={photoUrl}
                     alt={selectedTerrace.name}
-                    style={{ width: '100%', height: 160, objectFit: 'cover', borderRadius: 10, marginBottom: 14, display: 'block' }}
+                    style={{ width: '100%', height: 160, objectFit: 'cover', borderRadius: 4, marginBottom: 14, display: 'block', border: '2px solid #C4A060' }}
                   />
                 )}
 
-                {/* ⭐ · avis · badge ouvert + close */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                {/* Note · avis · badge ouvert */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                     <StarRating rating={selectedTerrace.rating} />
                     {selectedTerrace.reviewCount > 0 && (
-                      <span style={{ fontSize: 12, color: '#6B7280' }}>
+                      <span style={{ fontSize: 12, color: '#8B6030' }}>
                         · {selectedTerrace.reviewCount.toLocaleString('fr-FR')} avis
                       </span>
                     )}
                     {selectedTerrace.isOpen !== null && (
                       <span style={{
-                        fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 20,
+                        fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 4,
                         background: selectedTerrace.isOpen ? '#DCFCE7' : '#FEE2E2',
                         color: selectedTerrace.isOpen ? '#16A34A' : '#DC2626',
                       }}>
@@ -1235,18 +1254,18 @@ export default function App() {
                   </div>
                   <button
                     onClick={e => { e.stopPropagation(); setSelectedTerrace(null) }}
-                    style={{ ...btnBase, background: '#F3F4F6', borderRadius: '50%', width: 30, height: 30, flexShrink: 0 }}
+                    style={{ ...btnBase, background: '#1C0F06', border: '1.5px solid #3D1F0A', borderRadius: 4, width: 30, height: 30, flexShrink: 0 }}
                   >
-                    <IconX size={16} />
+                    <IconX size={16} color="#C4A882" />
                   </button>
                 </div>
 
-                {/* Adresse · type */}
+                {/* Adresse */}
                 {selectedTerrace.address && (
-                  <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 14 }}>
+                  <div style={{ fontSize: 13, color: '#A07040', marginBottom: 14, borderLeft: '2px solid #D4500A', paddingLeft: 12 }}>
                     {selectedTerrace.address}
                     {selectedTerrace.type && (
-                      <span style={{ color: '#9CA3AF' }}> · {selectedTerrace.type}</span>
+                      <span style={{ color: '#C4A060' }}> · {selectedTerrace.type}</span>
                     )}
                   </div>
                 )}
@@ -1254,20 +1273,21 @@ export default function App() {
                 {/* Itinéraire + Partager */}
                 <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
                   <button style={{
-                    ...btnBase, flex: 1, background: '#1C1C1E', borderRadius: 10,
-                    padding: '13px', color: '#fff', fontSize: 14, fontWeight: 600, gap: 8,
+                    ...btnBase, flex: 1, background: '#1C0F06', borderRadius: 4,
+                    padding: '14px', color: '#F5E6C8', gap: 8, border: 'none',
+                    fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: 3,
+                    boxShadow: '4px 4px 0px #D4500A',
                   }}>
-                    <IconNavigation size={15} color="#fff" />
+                    <IconNavigation size={15} color="#F5E6C8" />
                     Itinéraire
                   </button>
                   <button style={{
                     ...btnBase, width: 50, flexShrink: 0,
-                    background: '#F3F4F6', borderRadius: 10, border: '1px solid #E5E7EB',
+                    background: '#EDD9A8', borderRadius: 4, border: '1.5px solid #C4A060',
                   }}>
-                    <IconShare size={18} color="#374151" />
+                    <IconShare size={18} color="#8B6030" />
                   </button>
                 </div>
-
               </div>
             )}
           </>
@@ -1279,40 +1299,40 @@ export default function App() {
         <>
           <div
             onClick={() => setShowPlanifier(false)}
-            style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 1200 }}
+            style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1200 }}
           />
           <div style={{
             position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-            background: '#fff', borderRadius: 16, border: '0.5px solid #E8D8B0',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            background: '#1C0F06', borderRadius: 4, border: '2px solid #3D1F0A',
+            boxShadow: '6px 6px 0px #D4500A',
             maxWidth: 360, width: 'calc(100% - 32px)', zIndex: 1201,
             overflow: 'hidden',
           }}>
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 16px 12px' }}>
-              <IconClock size={20} color="#E8940A" />
-              <span style={{ flex: 1, fontSize: 16, fontWeight: 700, color: '#1C1C1E' }}>Planifier ma terrasse</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', background: '#241208', borderBottom: '2px solid #3D1F0A' }}>
+              <IconClock size={20} color="#D4500A" />
+              <span style={{ flex: 1, fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: '#F5E6C8', letterSpacing: 2 }}>Planifier ma terrasse</span>
               <button
                 onClick={() => setShowPlanifier(false)}
-                style={{ ...btnBase, background: '#F3F4F6', borderRadius: '50%', width: 28, height: 28 }}
+                style={{ ...btnBase, background: '#1C0F06', border: '1.5px solid #3D1F0A', borderRadius: 4, width: 28, height: 28 }}
               >
-                <IconX size={14} />
+                <IconX size={14} color="#C4A882" />
               </button>
             </div>
 
             <div style={{ padding: '0 16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
               {/* Quartier */}
-              <div>
-                <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Quartier</div>
+              <div style={{ marginTop: 16 }}>
+                <div style={{ fontSize: 10, color: '#7A5A42', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Quartier</div>
                 <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: 8, marginBottom: 8 }}>
-                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 12px' }}>
-                    <IconMapPin size={15} color="#9CA3AF" />
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, border: '1.5px solid #3D1F0A', borderRadius: 4, padding: '8px 12px', background: '#0F0702' }}>
+                    <IconMapPin size={15} color="#7A5A42" />
                     <input
                       type="text"
                       placeholder="Ex : Marais, Bastille…"
                       value={planifQuartier}
                       onChange={e => setPlanifQuartier(e.target.value)}
-                      style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, fontFamily: 'inherit', color: '#1C1C1E', background: 'transparent' }}
+                      style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, fontFamily: "'Space Grotesk', sans-serif", color: '#C4A882', background: 'transparent' }}
                     />
                   </div>
                   <button
@@ -1334,14 +1354,14 @@ export default function App() {
                       })
                     }}
                     style={{
-                      background: '#F9F9F9', border: '0.5px solid #E5E7EB',
-                      borderRadius: 8, padding: '7px 10px', fontSize: 12,
-                      color: '#374151', cursor: 'pointer', whiteSpace: 'nowrap',
+                      background: '#241208', border: '1.5px solid #3D1F0A',
+                      borderRadius: 4, padding: '7px 10px', fontSize: 12,
+                      color: '#C4A882', cursor: 'pointer', whiteSpace: 'nowrap',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-                      width: isMobile ? '100%' : 'auto',
+                      width: isMobile ? '100%' : 'auto', fontFamily: "'Space Grotesk', sans-serif",
                     }}
                   >
-                    <IconNavigation size={13} color="#374151" />
+                    <IconNavigation size={13} color="#C4A882" />
                     Autour de moi
                   </button>
                 </div>
@@ -1358,10 +1378,12 @@ export default function App() {
                         }
                       }}
                       style={{
-                        ...btnBase, fontSize: 12, fontWeight: 500,
-                        background: planifQuartier === q ? '#E8940A' : '#F3F4F6',
-                        color: planifQuartier === q ? '#fff' : '#374151',
-                        borderRadius: 20, padding: '4px 12px', border: 'none',
+                        ...btnBase, fontSize: 11, fontWeight: 500,
+                        background: planifQuartier === q ? '#D4500A' : '#241208',
+                        color: planifQuartier === q ? '#F5E6C8' : '#C4A882',
+                        border: planifQuartier === q ? '1.5px solid #D4500A' : '1.5px solid #3D1F0A',
+                        borderRadius: 4, padding: '4px 12px',
+                        boxShadow: planifQuartier === q ? '2px 2px 0px #8B3A07' : 'none',
                       }}
                     >
                       {q}
@@ -1372,7 +1394,7 @@ export default function App() {
 
               {/* Type */}
               <div>
-                <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Type</div>
+                <div style={{ fontSize: 10, color: '#7A5A42', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Type</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   {['Tous', 'Bar', 'Café', 'Restaurant'].map(t => (
                     <button
@@ -1380,10 +1402,11 @@ export default function App() {
                       onClick={() => setPlanifType(t)}
                       style={{
                         ...btnBase, fontSize: 13, fontWeight: planifType === t ? 500 : 400,
-                        background: planifType === t ? '#FFF7E6' : '#F9F9F9',
-                        color: planifType === t ? '#8B6914' : '#374151',
-                        border: planifType === t ? '0.5px solid #E8940A' : '0.5px solid #E5E7EB',
-                        borderRadius: 20, padding: '4px 12px',
+                        background: planifType === t ? '#D4500A' : '#241208',
+                        color: planifType === t ? '#F5E6C8' : '#7A5A42',
+                        border: planifType === t ? '1.5px solid #D4500A' : '1.5px solid #3D1F0A',
+                        borderRadius: 4, padding: '4px 12px',
+                        boxShadow: planifType === t ? '2px 2px 0px #8B3A07' : 'none',
                       }}
                     >
                       {t}
@@ -1394,20 +1417,20 @@ export default function App() {
 
               {/* Plage horaire */}
               <div>
-                <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Plage horaire</div>
+                <div style={{ fontSize: 10, color: '#7A5A42', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Plage horaire</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <select
                     value={planifDebut}
                     onChange={e => setPlanifDebut(e.target.value)}
-                    style={{ flex: 1, border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'inherit', color: '#1C1C1E', background: '#fff', outline: 'none' }}
+                    style={{ flex: 1, border: '1.5px solid #3D1F0A', borderRadius: 4, padding: '8px 10px', fontSize: 14, fontFamily: "'Space Grotesk', sans-serif", color: '#C4A882', background: '#241208', outline: 'none' }}
                   >
                     {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
-                  <span style={{ color: '#9CA3AF', fontSize: 13 }}>→</span>
+                  <span style={{ color: '#5C3A22', fontSize: 13 }}>→</span>
                   <select
                     value={planifFin}
                     onChange={e => setPlanifFin(e.target.value)}
-                    style={{ flex: 1, border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'inherit', color: '#1C1C1E', background: '#fff', outline: 'none' }}
+                    style={{ flex: 1, border: '1.5px solid #3D1F0A', borderRadius: 4, padding: '8px 10px', fontSize: 14, fontFamily: "'Space Grotesk', sans-serif", color: '#C4A882', background: '#241208', outline: 'none' }}
                   >
                     {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -1416,16 +1439,17 @@ export default function App() {
 
               {/* Exposition */}
               <div>
-                <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Exposition</div>
+                <div style={{ fontSize: 10, color: '#7A5A42', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Exposition</div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button
                     onClick={() => setPlanifExposition('soleil')}
                     style={{
                       ...btnBase, flex: 2, padding: '10px', gap: 6,
-                      borderRadius: 8, fontSize: 13, fontWeight: 600,
-                      background: planifExposition === 'soleil' ? '#FFF7E6' : '#F9F9F9',
-                      border: planifExposition === 'soleil' ? '2px solid #E8940A' : '2px solid transparent',
-                      color: planifExposition === 'soleil' ? '#E8940A' : '#374151',
+                      borderRadius: 4, fontFamily: "'Bebas Neue', sans-serif", fontSize: 14, letterSpacing: 1,
+                      background: planifExposition === 'soleil' ? '#D4500A' : '#241208',
+                      border: planifExposition === 'soleil' ? '2px solid #8B3A07' : '1.5px solid #3D1F0A',
+                      color: planifExposition === 'soleil' ? '#F5E6C8' : '#7A5A42',
+                      boxShadow: planifExposition === 'soleil' ? '2px 2px 0px #8B3A07' : 'none',
                     }}
                   >
                     ☀️ Au soleil
@@ -1434,11 +1458,12 @@ export default function App() {
                     onClick={() => setPlanifExposition('ombre')}
                     style={{
                       ...btnBase, flex: 1, padding: '10px',
-                      borderRadius: 8, fontSize: 13, fontWeight: 600,
-                      background: '#F9F9F9',
-                      border: planifExposition === 'ombre' ? '2px solid #94A3B8' : '2px solid transparent',
-                      color: '#374151',
+                      borderRadius: 4,
+                      background: '#241208',
+                      border: '1.5px solid #3D1F0A',
+                      color: '#7A5A42',
                       opacity: planifExposition === 'ombre' ? 1 : 0.6,
+                      fontFamily: "'Space Grotesk', sans-serif",
                     }}
                   >
                     À l'ombre
@@ -1446,7 +1471,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Bouton Voir les terrasses */}
+              {/* Voir les terrasses */}
               <button
                 onClick={() => {
                   const [debutH, debutM] = planifDebut.split(':').map(Number)
@@ -1506,9 +1531,10 @@ export default function App() {
                   setShowPlanifier(false)
                 }}
                 style={{
-                  ...btnBase, background: '#E8940A', color: '#fff',
-                  borderRadius: 10, padding: '13px', fontSize: 15, fontWeight: 600,
-                  width: '100%',
+                  ...btnBase, background: '#D4500A', color: '#F5E6C8',
+                  borderRadius: 4, padding: '14px', border: 'none',
+                  fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: 3,
+                  width: '100%', boxShadow: '4px 4px 0px #8B3A07',
                 }}
               >
                 Voir les terrasses
@@ -1522,18 +1548,18 @@ export default function App() {
       {planifActif && (
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 1100,
-          background: '#fff', borderRadius: '20px 20px 0 0',
-          borderTop: '0.5px solid #E8D8B0',
-          boxShadow: '0 -8px 40px rgba(0,0,0,0.10)',
+          background: '#1C0F06', borderRadius: '16px 16px 0 0',
+          borderTop: '2px solid #D4500A',
+          boxShadow: '0 -8px 40px rgba(0,0,0,0.3)',
           height: 180, display: 'flex', flexDirection: 'column',
         }}>
           {/* Drag bar */}
           <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px' }}>
-            <div style={{ width: 36, height: 4, borderRadius: 2, background: '#E5E7EB' }} />
+            <div style={{ width: 36, height: 4, borderRadius: 2, background: '#3D1F0A' }} />
           </div>
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px 8px' }}>
-            <span style={{ fontSize: 13, fontWeight: 500, color: '#1C1C1E', fontFamily: "'Syne', sans-serif" }}>Terrasses disponibles</span>
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: '#F5E6C8', letterSpacing: 2 }}>Terrasses disponibles</span>
             <button
               onClick={() => {
                 setPlanifActif(false)
@@ -1541,15 +1567,15 @@ export default function App() {
                 setPlanifType('Tous')
                 setTime(new Date())
               }}
-              style={{ ...btnBase, background: '#F3F4F6', borderRadius: '50%', width: 24, height: 24 }}
+              style={{ ...btnBase, background: '#241208', border: '1.5px solid #3D1F0A', borderRadius: 4, width: 24, height: 24 }}
             >
-              <IconX size={12} />
+              <IconX size={12} color="#C4A882" />
             </button>
           </div>
           {/* Liste */}
           <div style={{ overflowY: 'auto', flex: 1 }}>
             {planifResultats.length === 0
-              ? <div style={{ fontSize: 13, color: '#9CA3AF', padding: '10px 16px' }}>Aucune terrasse ne correspond à ces critères.</div>
+              ? <div style={{ fontSize: 13, color: '#7A5A42', padding: '10px 16px' }}>Aucune terrasse ne correspond à ces critères.</div>
               : planifResultats.map((t, i) => (
                 <div
                   key={t.id}
@@ -1559,24 +1585,24 @@ export default function App() {
                   }}
                   style={{
                     display: 'flex', alignItems: 'center', padding: '10px 16px',
-                    borderBottom: '0.5px solid #F9F9F9', cursor: 'pointer',
+                    borderBottom: '1px solid #241208', cursor: 'pointer',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = '#FAFAFA' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#241208' }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: '#1C1C1E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: "'Syne', sans-serif" }}>{t.name}</div>
+                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, color: '#F5E6C8', letterSpacing: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
                       {t.rating && (
                         <>
-                          <IconStar size={11} color="#E8940A" />
-                          <span style={{ fontSize: 12, color: '#6B7280' }}>{t.rating.toFixed(1)}</span>
-                          {t.type && <span style={{ fontSize: 12, color: '#6B7280' }}>· {t.type}</span>}
+                          <IconStar size={11} color="#D4500A" />
+                          <span style={{ fontSize: 11, color: '#7A5A42' }}>{t.rating.toFixed(1)}</span>
+                          {t.type && <span style={{ fontSize: 11, color: '#7A5A42' }}>· {t.type}</span>}
                         </>
                       )}
                     </div>
                   </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3D1F0A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </div>
@@ -1586,29 +1612,31 @@ export default function App() {
         </div>
       )}
 
-      {/* Intro tooltip — premier chargement */}
+      {/* Intro tooltip */}
       {showIntro && (
         <>
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1149 }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1149 }} />
           <div style={{
             position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-            background: '#fff', borderRadius: 16, padding: 24,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            background: '#1C0F06', borderRadius: 4, padding: 24,
+            border: '2px solid #3D1F0A', boxShadow: '6px 6px 0px #D4500A',
             maxWidth: 320, width: 'calc(100vw - 48px)', zIndex: 1150,
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
           }}>
-            <IconSun size={32} color="#F59E0B" />
-            <span style={{ fontSize: 20, fontWeight: 700, textAlign: 'center', color: '#1C1C1E' }}>
+            <IconSun size={32} color="#D4500A" />
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 28, textAlign: 'center', color: '#F5E6C8', letterSpacing: 3 }}>
               Trouve ta terrasse au soleil
             </span>
-            <span style={{ fontSize: 14, color: '#6B7280', textAlign: 'center', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
+            <span style={{ fontSize: 13, color: '#7A5A42', textAlign: 'center', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
               {'🟠 Orange = au soleil en ce moment\n⚫ Gris = à l\'ombre\nUtilise le slider pour simuler une autre heure'}
             </span>
             <button
               onClick={() => { localStorage.setItem('helio_intro_seen', '1'); setShowIntro(false) }}
               style={{
-                ...btnBase, background: '#F59E0B', color: '#fff', borderRadius: 10,
-                padding: '12px 24px', fontWeight: 600, fontSize: 15, width: '100%', marginTop: 4,
+                ...btnBase, background: '#D4500A', color: '#F5E6C8', borderRadius: 4,
+                padding: '12px 24px', fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: 18, letterSpacing: 3, width: '100%', marginTop: 4,
+                boxShadow: '4px 4px 0px #8B3A07', border: 'none',
               }}
             >
               C'est parti !
@@ -1617,6 +1645,7 @@ export default function App() {
         </>
       )}
 
+      {/* Bouton géolocalisation */}
       <button
         onClick={() => {
           if (!navigator.geolocation) return
@@ -1635,17 +1664,17 @@ export default function App() {
           zIndex: 1100,
           width: 36,
           height: 36,
-          borderRadius: '50%',
-          background: 'white',
-          border: '0.5px solid #E8D8B0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          borderRadius: 4,
+          background: '#1C0F06',
+          border: '1.5px solid #3D1F0A',
+          boxShadow: '2px 2px 0px #D4500A',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
         }}
       >
-        <IconNavigation size={16} color="#E8940A" />
+        <IconNavigation size={16} color="#F4A460" />
       </button>
 
     </div>
