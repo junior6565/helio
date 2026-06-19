@@ -214,7 +214,7 @@ const btnBase = {
 
 // ─── TimeSlider component ─────────────────────────────────────────────────────
 
-function TimeSlider({ time, timeSlots, onChange }) {
+function TimeSlider({ time, timeSlots, onChange, onDragStart, onDragEnd }) {
   const timeValue = time.getHours() * 60 + time.getMinutes()
   return (
     <>
@@ -237,8 +237,13 @@ function TimeSlider({ time, timeSlots, onChange }) {
           )
         })}
       </div>
-      <input type="range" min={480} max={1320} step={30} value={timeValue} onChange={onChange}
-        style={{ width: '100%', accentColor: '#F4A460', cursor: 'pointer' }} />
+      <input type="range" min={480} max={1320} step={30} value={timeValue}
+        onChange={onChange}
+        onPointerDown={onDragStart}
+        onPointerUp={onDragEnd}
+        onTouchStart={onDragStart}
+        onTouchEnd={onDragEnd}
+        style={{ width: '100%', accentColor: '#F4A460', cursor: 'pointer', touchAction: 'none' }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
         <span style={{ fontSize: 9, color: '#5C3A22' }}>08:00</span>
         <span style={{ fontSize: 9, color: '#5C3A22' }}>22:00</span>
@@ -279,6 +284,7 @@ export default function App() {
   const geoMarkerRef = useRef(null)
   const baselineCacheRef = useRef({})
   const shadowScheduleRef = useRef({})
+  const isDraggingRef = useRef(false)
 
   const [time, setTime] = useState(() => {
     const now = new Date()
@@ -344,6 +350,8 @@ export default function App() {
       center: [48.8534, 2.3488],
       zoom: 17,
       zoomControl: false,
+      zoomSnap: 0.5,
+      wheelPxPerZoomLevel: 80,
     })
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -415,6 +423,11 @@ export default function App() {
   useEffect(() => {
     shadowCacheRef.current = {}
     if (shadowReadTimerRef.current) clearTimeout(shadowReadTimerRef.current)
+
+    // Pendant le drag du slider : on vide le cache (fallback altitude) sans
+    // re-render OSM ni lecture canvas — le vrai update arrive au pointerUp
+    if (isDraggingRef.current) return
+
     if (!map.current || !mapContainer.current) return
 
     const canvas = mapContainer.current.querySelectorAll('canvas')[0]
@@ -808,6 +821,17 @@ export default function App() {
     setTime(d)
   }
 
+  const handleSliderDragStart = () => {
+    isDraggingRef.current = true
+  }
+
+  const handleSliderDragEnd = () => {
+    isDraggingRef.current = false
+    // Fire le vrai update OSM + lecture canvas maintenant que le slider est relâché
+    shadowRendererRef.current?.update(timeRef.current)
+    scheduleShadowRead(300)
+  }
+
   const pillsConfig = [
     { label: 'Ouvert', active: filter.onlyOpen, onClick: () => setFilter(f => ({ ...f, onlyOpen: !f.onlyOpen })) },
     { label: '4+ étoiles', active: filter.minRating >= 4, onClick: () => setFilter(f => ({ ...f, minRating: f.minRating >= 4 ? 0 : 4 })), icon: <IconStar size={10} color={filter.minRating >= 4 ? '#F5E6C8' : '#D4500A'} /> },
@@ -1151,7 +1175,7 @@ export default function App() {
         pointerEvents: (selectedTerrace || planifActif) ? 'none' : 'auto',
         transition: 'opacity 0.25s ease',
       }}>
-        <TimeSlider time={time} timeSlots={timeSlots} onChange={handleTimeChange} />
+        <TimeSlider time={time} timeSlots={timeSlots} onChange={handleTimeChange} onDragStart={handleSliderDragStart} onDragEnd={handleSliderDragEnd} />
       </div>
 
       {/* Bottom sheet — terrace detail */}
@@ -1308,7 +1332,7 @@ export default function App() {
               {/* Slider */}
               <div style={{ borderTop: '2px solid #C4A060', paddingTop: 12, marginTop: 8 }}>
                 <div style={{ background: '#1C0F06', borderRadius: 4, padding: '10px 12px', border: '1.5px solid #3D1F0A' }}>
-                  <TimeSlider time={time} timeSlots={timeSlots} onChange={handleTimeChange} />
+                  <TimeSlider time={time} timeSlots={timeSlots} onChange={handleTimeChange} onDragStart={handleSliderDragStart} onDragEnd={handleSliderDragEnd} />
                 </div>
               </div>
             </div>
