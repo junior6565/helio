@@ -2,7 +2,7 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>helio — trouve ta terrasse au soleil</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='none' stroke='%23E8940A' stroke-width='6'/><circle cx='50' cy='50' r='32' fill='none' stroke='%23E8940A' stroke-width='6'/><circle cx='50' cy='50' r='14' fill='%23E8940A'/></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,6 +16,8 @@
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', -apple-system, sans-serif; }
       body { overflow: hidden; background: #0f172a; }
+      input, select, textarea { font-size: 16px !important; }
+      .leaflet-control-attribution { margin-bottom: env(safe-area-inset-bottom) !important; bottom: 0 !important; }
       #root { width: 100vw; height: 100dvh; }
       input[type="range"] {
         -webkit-appearance: none;

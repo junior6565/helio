@@ -846,10 +846,10 @@ export default function App() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div style={{ width: '100vw', height: '100dvh', position: 'relative', fontFamily: "'Space Grotesk', -apple-system, sans-serif" }}>
+    <div style={{ width: '100vw', height: '100dvh', position: 'relative', fontFamily: "'Space Grotesk', -apple-system, sans-serif", touchAction: 'pan-x pan-y' }}>
 
       {/* Map */}
-      <div ref={mapContainer} style={{ position: 'absolute', inset: 0, zIndex: 0, isolation: 'isolate' }} />
+      <div ref={mapContainer} style={{ position: 'absolute', inset: 0, zIndex: 0, isolation: 'isolate', touchAction: 'auto' }} />
 
       {/* Search bar + quick filter pills */}
       <div style={{
