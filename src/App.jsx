@@ -350,7 +350,6 @@ export default function App() {
       center: [48.8534, 2.3488],
       zoom: 17,
       zoomControl: false,
-      zoomSnap: 0.5,
       wheelPxPerZoomLevel: 80,
     })
 
