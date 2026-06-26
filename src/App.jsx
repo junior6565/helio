@@ -7,6 +7,7 @@ import {
   generateTimeSlots,
 } from './utils/sun'
 import { fetchNearbyTerraces, searchPlaces } from './utils/places'
+import { testRaycastVsCanvas } from './utils/shadowRaycast'
 
 const GOOGLE_PLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY || ''
 const PARIS = { lat: 48.8566, lng: 2.3522 }
@@ -1276,6 +1277,18 @@ export default function App() {
                   </span>
                 </div>
               </div>
+              {/* TEST RAYCAST — temporaire */}
+              <button
+                onClick={() => testRaycastVsCanvas(terracesRef.current, timeRef.current, shadowCacheRef)}
+                style={{
+                  ...btnBase, background: '#0F0702', border: '1px dashed #3D1F0A',
+                  borderRadius: 3, padding: '4px 10px', marginBottom: 8,
+                  fontSize: 10, fontFamily: "'Bebas Neue', sans-serif",
+                  letterSpacing: 1, color: '#5C3A22',
+                }}
+              >
+                🔭 TEST RAYCAST
+              </button>
               {/* Confirmation terrasse communautaire */}
               {selectedTerrace && (() => {
                 const confirmation = terraceConfirmations[selectedTerrace.id]
