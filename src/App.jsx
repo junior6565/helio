@@ -311,6 +311,7 @@ export default function App() {
   const [showPlanifier, setShowPlanifier] = useState(false)
   const [showSearchHere, setShowSearchHere] = useState(false)
   const [planifQuartier, setPlanifQuartier] = useState('')
+  const [planifGeoResults, setPlanifGeoResults] = useState([])
   const [planifDebut, setPlanifDebut] = useState('17:00')
   const [planifFin, setPlanifFin] = useState('20:00')
   const [planifExposition, setPlanifExposition] = useState('soleil')
@@ -498,6 +499,18 @@ export default function App() {
     }, 300)
     return () => clearTimeout(timer)
   }, [searchQuery])
+
+  // ── Geocoding quartier Planifier ──────────────────────────────────────────
+  useEffect(() => {
+    const skip = !planifQuartier || planifQuartier.length < 2
+      || QUARTIERS[planifQuartier] || planifQuartier === 'Autour de moi'
+    if (skip) { setPlanifGeoResults([]); return }
+    const timer = setTimeout(async () => {
+      const results = await searchPlaces(planifQuartier, GOOGLE_PLACES_KEY)
+      setPlanifGeoResults(results.slice(0, 4))
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [planifQuartier])
 
   const VENUE_TYPES = ['bar', 'pub', 'cafe', 'coffee_shop', 'restaurant', 'bakery', 'food', 'meal']
 
@@ -955,11 +968,11 @@ export default function App() {
                 </div>
                 {/* Boutons droite */}
                 <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                  <button onClick={() => setFilterPanelOpen(true)} style={{ ...btnBase, background: 'rgba(0,0,0,0.2)', border: '1.5px solid rgba(245,230,200,0.3)', borderRadius: 4, padding: '5px 8px', gap: 4, color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1 }}>
-                    <IconSliders size={12} color="#F5E6C8" />FILTRES
+                  <button onClick={() => setFilterPanelOpen(true)} style={{ ...btnBase, background: 'rgba(0,0,0,0.2)', border: '1.5px solid rgba(245,230,200,0.3)', borderRadius: 4, padding: '8px 16px', gap: 6, color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, letterSpacing: 2 }}>
+                    <IconSliders size={13} color="#F5E6C8" />FILTRES
                   </button>
-                  <button onClick={() => setShowPlanifier(v => !v)} style={{ ...btnBase, background: 'rgba(0,0,0,0.3)', border: '1.5px solid #F5E6C8', borderRadius: 4, padding: '5px 8px', gap: 4, color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1 }}>
-                    <IconClock size={12} color="#F5E6C8" />PLANIFIER
+                  <button onClick={() => setShowPlanifier(v => !v)} style={{ ...btnBase, background: 'rgba(0,0,0,0.3)', border: '1.5px solid #F5E6C8', borderRadius: 4, padding: '8px 16px', gap: 6, color: '#F5E6C8', fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, letterSpacing: 2 }}>
+                    <IconClock size={13} color="#F5E6C8" />PLANIFIER
                   </button>
                 </div>
               </div>
@@ -1526,15 +1539,61 @@ export default function App() {
               <div style={{ marginTop: 16 }}>
                 <div style={{ fontSize: 10, color: '#7A5A42', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Quartier</div>
                 <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: 8, marginBottom: 8 }}>
-                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, border: '1.5px solid #3D1F0A', borderRadius: 4, padding: '8px 12px', background: '#0F0702' }}>
-                    <IconMapPin size={15} color="#7A5A42" />
-                    <input
-                      type="text"
-                      placeholder="Ex : Marais, Bastille…"
-                      value={planifQuartier}
-                      onChange={e => setPlanifQuartier(e.target.value)}
-                      style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, fontFamily: "'Space Grotesk', sans-serif", color: '#C4A882', background: 'transparent' }}
-                    />
+                  <div style={{ flex: 1, position: 'relative' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1.5px solid #3D1F0A', borderRadius: 4, padding: '8px 12px', background: '#0F0702' }}>
+                      <IconMapPin size={15} color="#7A5A42" />
+                      <input
+                        type="text"
+                        placeholder="Ex : Marais, Bastille…"
+                        value={planifQuartier}
+                        onChange={e => setPlanifQuartier(e.target.value)}
+                        style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, fontFamily: "'Space Grotesk', sans-serif", color: '#C4A882', background: 'transparent' }}
+                      />
+                      {planifQuartier.length > 0 && (
+                        <button onClick={() => { setPlanifQuartier(''); setPlanifGeoResults([]) }}
+                          style={{ ...btnBase, background: 'transparent', border: 'none', padding: 0, width: 16, height: 16 }}>
+                          <IconX size={12} color="#5C3A22" />
+                        </button>
+                      )}
+                    </div>
+                    {planifGeoResults.length > 0 && (
+                      <div style={{
+                        position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 10,
+                        background: '#241208', border: '1.5px solid #3D1F0A', borderRadius: 4,
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.4)', overflow: 'hidden',
+                      }}>
+                        {planifGeoResults.map((place, i) => (
+                          <button
+                            key={place.id || i}
+                            onMouseDown={() => {
+                              const lat = place.location?.latitude
+                              const lng = place.location?.longitude
+                              const name = place.displayName?.text || planifQuartier
+                              setPlanifQuartier(name)
+                              setPlanifGeoResults([])
+                              if (lat && lng && map.current) {
+                                flyingRef.current = true
+                                map.current.flyTo([lat, lng], 16, { duration: 0.8 })
+                                map.current.once('moveend', () => { flyingRef.current = false })
+                              }
+                            }}
+                            style={{
+                              display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+                              width: '100%', padding: '10px 14px', background: 'transparent',
+                              border: 'none', borderTop: i > 0 ? '1px solid #3D1F0A' : 'none',
+                              cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#1C0F06' }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                          >
+                            <span style={{ fontSize: 13, fontWeight: 500, color: '#C4A882' }}>{place.displayName?.text}</span>
+                            {place.formattedAddress && (
+                              <span style={{ fontSize: 11, color: '#5C3A22', marginTop: 2 }}>{place.formattedAddress}</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <button
                     onClick={async () => {
