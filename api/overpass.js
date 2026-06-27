@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     for await (const chunk of req) chunks.push(chunk)
     const body = Buffer.concat(chunks).toString()
 
-    const response = await fetch('https://overpass-api.de/api/interpreter', {
+    const response = await fetch('https://overpass.kumi.systems/api/interpreter', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body,
