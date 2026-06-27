@@ -11,7 +11,10 @@ export default async function handler(req, res) {
 
     const response = await fetch('https://overpass.kumi.systems/api/interpreter', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'helio-app/1.0 (helio-bay.vercel.app)'
+      },
       body,
     })
     const text = await response.text()
