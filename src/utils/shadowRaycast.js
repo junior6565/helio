@@ -7,10 +7,16 @@ export async function fetchBuildingsAround(lat, lng, radius = 200) {
   try {
     const res = await fetch('/api/overpass', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'data=' + encodeURIComponent(query),
     })
     if (!res.ok) throw new Error(`Overpass ${res.status}`)
-    const data = await res.json()
+    const text = await res.text()
+    if (text.trimStart().startsWith('<')) {
+      console.error('[RAYCAST] Overpass returned HTML:', text.slice(0, 200))
+      return []
+    }
+    const data = JSON.parse(text)
     return data.elements
       .filter(el => el.type === 'way' && el.geometry?.length >= 3)
       .map(el => {
