@@ -7,6 +7,7 @@ import {
   generateTimeSlots,
 } from './utils/sun'
 import { fetchNearbyTerraces, searchPlaces } from './utils/places'
+import { testRaycastVsCanvas } from './utils/shadowRaycast'
 
 const GOOGLE_PLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY || ''
 const PARIS = { lat: 48.8566, lng: 2.3522 }
@@ -1420,9 +1421,7 @@ export default function App() {
                 </div>
                 <button
                   onClick={() => {
-                    import('./utils/shadowRaycast').then(({ testRaycastVsCanvas }) => {
-                      testRaycastVsCanvas(terracesRef.current, timeRef.current, shadowCacheRef)
-                    })
+                    testRaycastVsCanvas(terracesRef.current, timeRef.current, shadowCacheRef)
                   }}
                   style={{ fontSize: 10, color: '#7A5A42', background: 'none', border: '1px dashed #3D1F0A', borderRadius: 4, padding: '4px 8px', cursor: 'pointer', marginTop: 8, width: '100%' }}
                 >
