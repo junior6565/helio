@@ -5,7 +5,7 @@ import { getSunPosition } from './sun'
 export async function fetchBuildingsAround(lat, lng, radius = 200) {
   const query = `[out:json][timeout:15];(way["building"](around:${radius},${lat},${lng}););out geom tags;`
   try {
-    const res = await fetch('https://overpass-api.de/api/interpreter', {
+    const res = await fetch('/api/overpass', {
       method: 'POST',
       body: 'data=' + encodeURIComponent(query),
     })
