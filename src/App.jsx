@@ -7,7 +7,8 @@ import {
   generateTimeSlots,
 } from './utils/sun'
 import { fetchNearbyTerraces, searchPlaces } from './utils/places'
-import { testRaycastVsCanvas } from './utils/shadowRaycast'
+import { testRaycastVsCanvas, isTerraceShadowed } from './utils/shadowRaycast'
+import { preloadBuildings, getBuildingsAroundSync } from './utils/buildingsCache'
 
 const GOOGLE_PLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY || ''
 const PARIS = { lat: 48.8566, lng: 2.3522 }
@@ -380,6 +381,7 @@ export default function App() {
 
     setMapReady(true)
     loadTerraces(PARIS.lat, PARIS.lng, 800)
+    preloadBuildings().then(() => setShadowVersion(v => v + 1))
     setTimeout(() => scheduleShadowRead(), 1000)
 
     map.current.on('moveend', () => {
@@ -538,13 +540,13 @@ export default function App() {
   }
 
   const getShadowStatus = useCallback((terrace, currentTime) => {
-    const { altitude } = getSunPosition(currentTime, terrace.lat, terrace.lng)
-    if (altitude <= 5) return false
+    const sunPos = getSunPosition(currentTime, terrace.lat, terrace.lng)
+    if (sunPos.altitude <= 5) return false
 
-    const cached = shadowCacheRef.current[terrace.id]
-    if (cached !== undefined) return cached
+    const nearbyBuildings = getBuildingsAroundSync(terrace.lat, terrace.lng, 200)
+    if (!nearbyBuildings.length) return sunPos.altitude > 30  // altitude fallback if not loaded
 
-    return altitude > 30
+    return !isTerraceShadowed(terrace, nearbyBuildings, sunPos)
   }, [])
 
   const readShadowPixels = useCallback(() => {
@@ -659,18 +661,6 @@ export default function App() {
   const computeSunnyUntil = useCallback((terrace, currentTime) => {
     if (!getShadowStatus(terrace, currentTime)) return null
 
-    const schedule = shadowScheduleRef.current[terrace.id]
-
-    const getScheduledStatus = (t, slotTime) => {
-      if (schedule) {
-        const key = slotTime.getHours() * 100 + slotTime.getMinutes()
-        const v = schedule[key]
-        if (v !== undefined) return v
-      }
-      return getShadowStatus(t, slotTime)
-    }
-
-    // Aligne le curseur sur le prochain créneau 30 min
     const startCursor = new Date(currentTime)
     const rem = startCursor.getMinutes() % 30
     if (rem !== 0) startCursor.setMinutes(startCursor.getMinutes() + (30 - rem), 0, 0)
@@ -683,8 +673,7 @@ export default function App() {
     maxTime.setHours(22, 0, 0, 0)
 
     while (cursor <= maxTime) {
-      const sunny = getScheduledStatus(terrace, cursor)
-      if (!sunny) break
+      if (!getShadowStatus(terrace, cursor)) break
       lastSunnyTime = new Date(cursor)
       cursor = new Date(cursor.getTime() + 30 * 60 * 1000)
     }
